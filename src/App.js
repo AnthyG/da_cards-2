@@ -7,8 +7,14 @@ import io from 'socket.io-client';
 var log = function log(...m) {
     console.log('\n' + Date().toString() + ':\n', m);
 };
+var err = function err(...m) {
+    console.error('\n' + Date().toString() + ':\n', m);
+};
 
 const socket = io('http://localhost:3000');
+
+socket.on('err', err);
+socket.on('log', log);
 
 class FormLogin extends Component {
     constructor(props) {
@@ -87,9 +93,33 @@ class Login extends Component {
 class MainMenu extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            getUsername: this.props.username
+        };
 
         this.handleLogout = this.handleLogout.bind(this);
-        this.handleMatchSearch = this.handleMatchSearch.bind(this);
+        this.handleStateChange = this.handleStateChange.bind(this);
+
+        this.getUl = this.getUl.bind(this);
+        this.handleGetUsernameChange = this.handleGetUsernameChange.bind(this);
+    }
+
+    getUl(event, ul) {
+        event.preventDefault();
+
+        socket.emit('getUserlist', ul);
+    }
+
+    handleGetUsernameChange(event) {
+        this.setState({
+            getUsername: event.target.value
+        });
+    }
+
+    getUser(event, un) {
+        event.preventDefault();
+
+        socket.emit('getUser', un);
     }
 
     handleLogout(event) {
@@ -98,22 +128,41 @@ class MainMenu extends Component {
         this.props.handleLogout();
     }
 
-    handleMatchSearch(event) {
+    handleStateChange(event) {
         event.preventDefault();
 
-        this.props.handleMatchSearch();
+        this.props.handleStateChange();
     }
 
     render() {
         const username = this.props.username;
         const state = this.props.state;
-        const stateText = (state === 'lobby' ? 'Start search' : (state === 'searching' ? 'Stop search' : (state === 'inGame' ? 'Give up' : 'Current state: ' + state)));
+        const getUsername = this.state.getUsername;
+        const stateTextArr = {
+            'lobby': 'Start search',
+            'searching': 'Stop search',
+            'waiting': 'Stop search',
+            'inGame': 'Give up',
+            'giveUp': 'You gave up :/',
+            'results': 'Back to lobby'
+        };
+        const stateText = stateTextArr[state] || 'Current state: ' + state;
 
         return (
             <div className="App-mainMenu">
                 <p>Welcome back, {username}! <a href="" onClick={this.handleLogout}>Log out</a></p>
                 <br />
-                <a href="" onClick={this.handleMatchSearch}>{stateText}</a>
+                <a href="#changeState" onClick={this.handleStateChange}>{stateText}</a>
+                <br />
+                <br />
+                <a href="#getUserlist.eo" onClick={(e) => this.getUl(e, 'eo')}>get ul.eo</a>&nbsp;
+                <a href="#getUserlist.o" onClick={(e) => this.getUl(e, 'o')}>get ul.o</a>&nbsp;
+                <a href="#getUserlist.g" onClick={(e) => this.getUl(e, 'g')}>get ul.g</a>&nbsp;
+                <a href="#getUserlist.gids" onClick={(e) => this.getUl(e, 'gids')}>get ul.gids</a>
+                <br />
+                <br />
+                <input type="text" value={getUsername} onChange={this.handleGetUsernameChange} />&nbsp;
+                <a href="#getUser" onClick={(e) => this.getUser(e, getUsername)}>get user</a>
             </div>
         );
     }
@@ -131,21 +180,46 @@ class App extends Component {
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
-        this.handleMatchSearch = this.handleMatchSearch.bind(this);
+        this.handleStateChange = this.handleStateChange.bind(this);
 
         const dis = this;
+        socket.on('userlist', function (ulN, ul) {
+            log('userlist >>', ulN, ul);
+        });
+        socket.on('user', function (unN, un) {
+            log('user >>', unN, un);
+        });
+        socket.on('state', function (state) {
+            log('state >>', state);
+            dis.setState({
+                state: state
+            });
+        });
+
         socket.on('loginProcessed', function (err) {
-            log('loginProcessed >>', 'Errors: ', err);
+            log('loginProcessed >>', err);
 
             dis.setState({
                 isLoggedIn: (err.length === 0 ? true : false)
             });
         });
-        socket.on('stateChanged', function (state) {
-            dis.setState({
-                state: state
-            });
+
+        socket.on('playerJoined', function (data) {
+            log('playerJoined >>', data);
+            socket.emit('startGame', data);
         });
+        socket.on('gameStarted', function (game) {
+            log('gameStarted >>', game);
+            socket.emit('gameStarted');
+        });
+        socket.on('gameEnded', function (game) {
+            log('gameEnded >>', game);
+            socket.emit('gameEnded');
+        });
+
+        setInterval(function () {
+            socket.emit('getState');
+        }, 5000);
     }
 
     handleUsernameChange(username) {
@@ -173,11 +247,19 @@ class App extends Component {
         socket.emit('logOut');
     }
 
-    handleMatchSearch() {
+    handleStateChange() {
         const state = this.state.state;
-        const nstate = (state === 'lobby' ? 'searching' : (state === 'searching' ? 'lobby' : (state === 'inGame' ? 'giveUp' : state)));
+        const state2nstateArr = {
+            'lobby': 'searching',
+            'searching': 'lobby',
+            'waiting': 'lobby',
+            'inGame': 'giveUp',
+            'giveUp': 'results',
+            'results': 'lobby'
+        };
+        const nstate = state2nstateArr[state];
 
-        socket.emit('toggleMatchSearch', nstate);
+        socket.emit('switchState', nstate);
     }
 
     render() {
@@ -187,7 +269,7 @@ class App extends Component {
 
         let CurScreen = null;
         if (isLoggedIn)
-            CurScreen = <MainMenu username={username} state={state} handleLogout={this.handleLogout} handleMatchSearch={this.handleMatchSearch} />;
+            CurScreen = <MainMenu username={username} state={state} handleLogout={this.handleLogout} handleStateChange={this.handleStateChange} />;
         else
             CurScreen = <Login username={username} handleUsernameChange={this.handleUsernameChange} handleLogin={this.handleLogin} />;
 
