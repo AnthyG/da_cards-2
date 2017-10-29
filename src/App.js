@@ -4,12 +4,18 @@ import './App.css';
 
 import io from 'socket.io-client';
 
+import './Card.css';
+import CardArr from './Cards.js';
+import Card from './Card.jsx';
+
 var log = function log(...m) {
     console.log('\n' + Date().toString() + ':\n', m);
 };
 var err = function err(...m) {
     console.error('\n' + Date().toString() + ':\n', m);
 };
+
+log(CardArr);
 
 const socket = io('http://localhost:3000');
 
@@ -72,10 +78,6 @@ class FormLogin extends Component {
 }
 
 class Login extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         const username = this.props.username;
 
@@ -280,6 +282,11 @@ class App extends Component {
                     <h1 className="App-title">Da_Cards</h1>
                 </header>
                 {CurScreen}
+                <div style={{backgroundColor: '#424242', padding: '0.25rem'}}>
+                    <Card fOb="front" type="King" style={{left: '50%', transform: 'translateX(-50%)'}} />
+                    <Card fOb="front" type="Queen" style={{left: '50%', transform: 'translateX(-50%)'}} />
+                    <Card fOb="back" type="Queen" style={{left: '50%', transform: 'translateX(-50%)'}} />
+                </div>
             </div>
         );
     }
