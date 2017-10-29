@@ -1,6 +1,6 @@
 {
-    "name": "da_cards_2",
-    "version": "0.0.1",
+    "name": "da_cards-2",
+    "version": "0.0.5",
     "private": true,
     "dependencies": {
         "react": "^16.0.0",

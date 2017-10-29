@@ -24,7 +24,7 @@ app.get(/^(.+)$/, function(req, res) {
 var loginlist = [];
 
 function getLoginList(cb) {
-    loginlist = eval(fs.readFileSync('loginlist.js', 'UTF-8'));
+    loginlist = eval(fs.readFileSync(__dirname + '/PRIVATE/loginlist.js', 'UTF-8'));
 
     typeof cb === 'function' && cb();
 }
