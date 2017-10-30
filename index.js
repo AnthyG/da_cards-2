@@ -15,6 +15,22 @@ server.listen(port, function() {
     log('Server listening on port ' + port);
 });
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+app.get('/cards', function(req, res) {
+    log('Serving all cards');
+    res.json(CardArr);
+});
+app.get('/card/:type', function(req, res) {
+    const type = req.params.type;
+    log('Serving card ', type);
+    res.json(CardArr[type]);
+});
+
 var dir = __dirname + '/build/';
 app.use(express.static(dir));
 app.get(/^(.+)$/, function(req, res) {
@@ -30,6 +46,19 @@ function getLoginList(cb) {
 }
 getLoginList();
 setInterval(getLoginList, 10000);
+
+var CardArr = [];
+
+function getCards(cb) {
+    const l1 = ('let CardArr = ').length;
+    const l2 = ('; export default CardArr;').length + 1;
+    const rCardArr = fs.readFileSync(__dirname + '/CardArr.js', 'UTF-8');
+    eval('CardArr = ' + rCardArr.substr(l1, rCardArr.length - l2 - l1));
+
+    typeof cb === 'function' && cb();
+}
+getCards();
+setInterval(getCards, 10000);
 
 // (min * 60secs)-1sec = secs
 var roundLengthNormal = (1 * 10) - 1; // 1min (60secs)
@@ -105,10 +134,31 @@ io.on('connection', function(socket) {
     }
 
     function sendUserlist(ul) {
-        if (userlists.hasOwnProperty(ul))
+        // **THIS IS ONLY FOR DEVELOPMENT!!!*
+        // THIS SHOULD BE SOMEWHAT FILTERING THE OUTPUT
+        // FOR EXAMPLE, .g SHOULDN'T CONTAIN ANY OTHER USER's .onHand
+        // OR IN GENERAL THE .inBlock, BUT FOR BOTH JUST THE NUMBER OF CARDS IN THERE
+        if (userlists.hasOwnProperty(ul)) {
             socket.emit('userlist', ul, userlists[ul]);
+        }
+        socket.on('getUserlist', sendUserlist);
     }
-    socket.on('getUserlist', sendUserlist);
+
+    function sendGame(gid) {
+        const cgid = gid || userlists.eo[socket.username].gid;
+
+        if (cgid !== null) {
+            var g = JSON.parse(JSON.stringify(userlists.g[cgid]));
+            const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+            g.Players[iAmNr].deck.inBlock = Object.keys(g.Players[iAmNr].deck.inBlock).length;
+            g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand).length;
+            g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock).length;
+
+            socket.emit('game', g);
+        }
+    }
+    socket.on('getGame', sendGame);
 
     function sendUser(username) {
         var username = username || socket.username;
@@ -140,6 +190,8 @@ io.on('connection', function(socket) {
         const cgid = userlists.eo[socket.username].gid;
         const players = [socket.username, odata.username];
 
+        log('Starting Game with GID', cgid);
+
         userlists.g[cgid] = {
             'gid': cgid,
             'Players': {
@@ -154,7 +206,7 @@ io.on('connection', function(socket) {
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MP-Left': 20
+                    'MPLeft': 20
                 },
                 1: {
                     'User': {
@@ -167,7 +219,7 @@ io.on('connection', function(socket) {
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MP-Left': 20
+                    'MPLeft': 20
                 }
             },
             'Creationdate': Date().toString(),
@@ -178,9 +230,49 @@ io.on('connection', function(socket) {
             'timeRunning': 0,
             'roundNumber': 0
         };
-        log('Starting Game with GID', cgid);
-        // sendLog('Starting Game', userlists.g[cgid]);
 
+        function generatedeckthingieandreturn(number, mode, empty) {
+            var mode = mode || false;
+            var empty = empty || false;
+
+            var arr;
+            arr = [];
+            var fncs;
+            fncs = [];
+            var ARRAYTHINGIEd = {};
+
+            function gRC() {
+                return CardArr[Object.keys(CardArr)[Math.floor(Math.random() * Object.keys(CardArr).length)]]; // WORKS FOR OBJECT's
+                // return CardArr[Math.floor(Math.random() * CardArr.length)]; // WORKS FOR ARRAY's
+            }
+
+            for (var a = 0; a < number; a++) {
+                fncs[a] = function(b, modeP, emptyP) {
+                    return function() {
+                        if (emptyP !== true) {
+                            arr[b] = gRC();
+                            arr[b]["CID"] = "CID-" + (Math.floor((Math.random() * 900) + 100)).toString();
+                            if (modeP === true) {
+                                arr[b]["position"] = b;
+                            }
+                            return JSON.stringify(arr[b]);
+                        } else if (emptyP === true) {
+                            arr[b] = null;
+                            return JSON.stringify(arr[b]);
+                        }
+                    }
+                };
+                ARRAYTHINGIEd[a] = (JSON.parse(fncs[a](a, mode, empty)()));
+            }
+            return ARRAYTHINGIEd;
+        }
+        for (var xa = 0; xa < 2; xa++) {
+            userlists.g[cgid].Players[xa].deck.onHand = generatedeckthingieandreturn(5);
+            userlists.g[cgid].Players[xa].deck.onField = generatedeckthingieandreturn(13, false, true);
+            userlists.g[cgid].Players[xa].deck.inBlock = generatedeckthingieandreturn(50);
+        }
+
+        // DON'T FORGET TO FILTER OUT THE OTHER USER's .onHand AND FOR BOTH THE .inBlock!
         io.in(cgid).emit('gameStarted', userlists.g[cgid]);
     }
     socket.on('startGame', startGame);
@@ -277,7 +369,9 @@ io.on('connection', function(socket) {
             username = verifyLogIn[0].name;
         }
 
-        if (err.length === 0 && username && userlists.o.indexOf(username) === -1) {
+        var alreadyLoggedIn = userlists.o.indexOf(username) !== -1;
+
+        if (err.length === 0 && username && !alreadyLoggedIn) {
             addedUser = true;
             numUsers++;
             socket.username = username;
@@ -295,6 +389,8 @@ io.on('connection', function(socket) {
 
             userlists.o.push(username);
             log(username, 'logged in', userlists.eo[username].gid);
+        } else if (alreadyLoggedIn) {
+            err.push('alreadyLoggedIn');
         }
 
         socket.emit('loginProcessed', err);

@@ -5,7 +5,6 @@ import './App.css';
 import io from 'socket.io-client';
 
 import './Card.css';
-import CardArr from './Cards.js';
 import Card from './Card.jsx';
 
 var log = function log(...m) {
@@ -14,8 +13,6 @@ var log = function log(...m) {
 var err = function err(...m) {
     console.error('\n' + Date().toString() + ':\n', m);
 };
-
-log(CardArr);
 
 const socket = io('http://localhost:3000');
 
@@ -77,12 +74,12 @@ class FormLogin extends Component {
     }
 }
 
-class Login extends Component {
+class LoginScreen extends Component {
     render() {
         const username = this.props.username;
 
         return (
-            <div className="App-login">
+            <div className="App-loginScreen">
                 <p className="App-intro">
                     A cool new multiplayer browsergame, based on NodeJS and socket.io
             </p>
@@ -92,7 +89,150 @@ class Login extends Component {
     }
 }
 
-class MainMenu extends Component {
+class RenderCardArr extends Component {
+    render() {
+        const arr = this.props.arr;
+        log('arr >>', arr);
+
+        const dt = this.props.dt;
+
+        var rArr = [];
+        if (typeof arr !== "number") {
+            // rArr = arr.map((card) => 
+            //     <Card key={y.cid} fOb="front" type={x} />
+            // );
+            for (var x in arr) {
+                var y = arr[x];
+                if (y !== null)
+                    rArr.push(
+                        <Card key={dt + '-' + y.cid} fOb="front" type={x} />
+                    );
+                else
+                    rArr.push(
+                        <Card key={dt + '-' + x.toString()} fOb="front" type={x} />
+                    );
+            }
+        } else {
+            for (var x = 0; x < arr; x++) {
+                rArr.push(
+                    <Card key={dt + '-' + x.toString()} fOb="back" type="" />
+                )
+            }
+        }
+        log(rArr);
+
+        return null;
+        return (
+            <div>{rArr}</div>
+        );
+    }
+}
+
+class DeckHand extends Component {
+    render() {
+        const cards = this.props.cards;
+        const ooe = this.props.ooe;
+
+        return (
+            <div className="deck-hand" ooe={ooe}>
+                <RenderCardArr arr={cards} dt="hand" />
+            </div>
+        );
+    }
+}
+
+class DeckField extends Component {
+    render() {
+        const cards = this.props.cards;
+        const ooe = this.props.ooe;
+
+        return (
+            <div className="deck-field" ooe={ooe}>
+                <RenderCardArr arr={cards} dt="field" />
+            </div>
+        );
+    }
+}
+
+class DeckBlock extends Component {
+    render() {
+        const cards = this.props.cards;
+        const ooe = this.props.ooe;
+
+        return (
+            <div className="deck-block" ooe={ooe}>
+                <RenderCardArr arr={cards} dt="block" />
+            </div>
+        );
+    }
+}
+
+class GameDeck extends Component {
+    render() {
+        const P = this.props.p;
+        const ooe = this.props.ooe;
+
+        return (
+            <div className="deck" ooe={ooe}>
+                <DeckHand cards={P.deck.onHand} ooe={ooe} />
+                <DeckField cards={P.deck.onField} ooe={ooe} />
+                <DeckBlock cards={P.deck.inBlock} ooe={ooe} />
+            </div>
+        );
+    }
+}
+
+class Game extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            g: {}
+        };
+
+        const dis = this;
+        socket.on('game', function (g) {
+            log('game >>', g);
+            dis.setState({
+                g: g
+            });
+        });
+        socket.emit('getGame');
+    }
+
+    componentDidMount() {
+        this.timerID = setInterval(
+            () => this.tick(),
+            1000
+            // 250
+        );
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timerID);
+    }
+
+    tick() {
+        socket.emit('getGame');
+    }
+
+    render() {
+        const username = this.props.username;
+        const g = this.state.g;
+        log('g2 >>', g);
+        if (!g.hasOwnProperty('gid'))
+            return null;
+
+        const iAmNr = g.Players[0].User.name === username ? 0 : 1;
+        return (
+            <div className="App-game">
+                <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" />
+                <GameDeck p={g.Players[iAmNr]} ooe="own" />
+            </div>
+        );
+    }
+}
+
+class MainScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -151,8 +291,8 @@ class MainMenu extends Component {
         const stateText = stateTextArr[state] || 'Current state: ' + state;
 
         return (
-            <div className="App-mainMenu">
-                <p>Welcome back, {username}! <a href="" onClick={this.handleLogout}>Log out</a></p>
+            <div className="App-mainScreen">
+                {state !== 'inGame' && <p>Welcome back, {username}! <a href="" onClick={this.handleLogout}>Log out</a></p>}
                 <br />
                 <a href="#changeState" onClick={this.handleStateChange}>{stateText}</a>
                 <br />
@@ -165,6 +305,7 @@ class MainMenu extends Component {
                 <br />
                 <input type="text" value={getUsername} onChange={this.handleGetUsernameChange} />&nbsp;
                 <a href="#getUser" onClick={(e) => this.getUser(e, getUsername)}>get user</a>
+                {state === 'inGame' && <Game username={username} />}
             </div>
         );
     }
@@ -271,9 +412,22 @@ class App extends Component {
 
         let CurScreen = null;
         if (isLoggedIn)
-            CurScreen = <MainMenu username={username} state={state} handleLogout={this.handleLogout} handleStateChange={this.handleStateChange} />;
+            // if (state === 'inGame')
+            //     CurScreen = <GameScreen />
+            // else
+            CurScreen = <MainScreen username={username} state={state} handleLogout={this.handleLogout} handleStateChange={this.handleStateChange} />;
         else
-            CurScreen = <Login username={username} handleUsernameChange={this.handleUsernameChange} handleLogin={this.handleLogin} />;
+            CurScreen = (
+                <div>
+                    <LoginScreen username={username} handleUsernameChange={this.handleUsernameChange} handleLogin={this.handleLogin} />
+
+                    <div style={{ backgroundColor: '#424242', padding: '0.25rem' }}>
+                        <Card fOb="front" type="King" style={{ left: '50%', transform: 'translateX(-50%)' }} />
+                        <Card fOb="front" type="Queen" style={{ left: '50%', transform: 'translateX(-50%)' }} />
+                        <Card fOb="back" type="" style={{ left: '50%', transform: 'translateX(-50%)' }} />
+                    </div>
+                </div>
+            );
 
         return (
             <div className="App">
@@ -282,11 +436,6 @@ class App extends Component {
                     <h1 className="App-title">Da_Cards</h1>
                 </header>
                 {CurScreen}
-                <div style={{backgroundColor: '#424242', padding: '0.25rem'}}>
-                    <Card fOb="front" type="King" style={{left: '50%', transform: 'translateX(-50%)'}} />
-                    <Card fOb="front" type="Queen" style={{left: '50%', transform: 'translateX(-50%)'}} />
-                    <Card fOb="back" type="Queen" style={{left: '50%', transform: 'translateX(-50%)'}} />
-                </div>
             </div>
         );
     }

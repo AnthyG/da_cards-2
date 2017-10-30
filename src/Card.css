@@ -1,21 +1,33 @@
 .Card {
     margin: 0.25rem;
     position: relative;
+    width: calc(5.5rem * 1);
+    height: calc(8.5rem * 1);
+    /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
+}
+
+.Card:hover {
     width: calc(5.5rem * 2);
     height: calc(8.5rem * 2);
-    /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
 }
 
 .Card .CardFG {
     transform: rotateY(0deg);
-    transition: all .5s cubic-bezier(0.075, 0.82, 0.165, 1);
     background: url(/Cards/Card%20Front.png) center center no-repeat;
 }
 
 .Card .CardBG {
     transform: rotateY(180deg);
-    transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);
     background: url(/Cards/Card%20Back.png) center center no-repeat;
+}
+
+.Card {
+    transition: all .1s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.Card .CardFG,
+.Card .CardBG {
+    transition: all .5s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 .Card[fOb="back"] {
@@ -54,7 +66,7 @@
 
 .Card .CardName {
     left: 50%;
-    bottom: 1.5rem;
+    bottom: 10%;
     position: absolute;
     transform: translateX(-50%);
 }
