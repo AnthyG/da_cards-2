@@ -1,12 +1,7 @@
 import React, { Component } from 'react';
 import request from 'sync-request';
 
-var log = function log(...m) {
-    console.log('\n' + Date().toString() + ':\n', m);
-};
-var err = function err(...m) {
-    console.error('\n' + Date().toString() + ':\n', m);
-};
+import { log, err } from './logerr.js';
 
 var CardArr = {};
 function getCardArr() {
@@ -90,6 +85,7 @@ class CardCorner extends Component {
 class Card extends Component {
     render() {
         const style = this.props.style;
+        const hoverable = this.props.hoverable || false;
 
         const fOb = this.props.fOb;
         const type = this.props.type;
@@ -105,7 +101,7 @@ class Card extends Component {
 
             "description": "", // Description of this card (will be shown on card-hover)
 
-            "CID": null,
+            "cid": null,
             "alreadyUsed": false, // if this card has already been played in "this" round
             "roundsLeft": 0, // rounds left, until this card will be destroyed (-1 for infinite)
 
@@ -137,7 +133,7 @@ class Card extends Component {
         const effects = C.effects;
 
         return (
-            <div className="Card" fob={fOb} style={style}>
+            <div className="Card" fob={fOb} hoverable={hoverable} style={style}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>

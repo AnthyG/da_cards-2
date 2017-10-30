@@ -138,11 +138,13 @@ io.on('connection', function(socket) {
         // THIS SHOULD BE SOMEWHAT FILTERING THE OUTPUT
         // FOR EXAMPLE, .g SHOULDN'T CONTAIN ANY OTHER USER's .onHand
         // OR IN GENERAL THE .inBlock, BUT FOR BOTH JUST THE NUMBER OF CARDS IN THERE
+        // ...... ok.
+        // just disable transmission of userlists.g, because there is sendGame(gid)
         if (userlists.hasOwnProperty(ul)) {
             socket.emit('userlist', ul, userlists[ul]);
         }
-        socket.on('getUserlist', sendUserlist);
     }
+    socket.on('getUserlist', sendUserlist);
 
     function sendGame(gid) {
         const cgid = gid || userlists.eo[socket.username].gid;
@@ -251,9 +253,9 @@ io.on('connection', function(socket) {
                     return function() {
                         if (emptyP !== true) {
                             arr[b] = gRC();
-                            arr[b]["CID"] = "CID-" + (Math.floor((Math.random() * 900) + 100)).toString();
+                            arr[b].cid = "cid-" + (Math.floor((Math.random() * 900) + 100)).toString();
                             if (modeP === true) {
-                                arr[b]["position"] = b;
+                                arr[b].position = b;
                             }
                             return JSON.stringify(arr[b]);
                         } else if (emptyP === true) {

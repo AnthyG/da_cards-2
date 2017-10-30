@@ -5,7 +5,7 @@ let CardArr = {
         "y_px": 6, // 510px
         "frameNr": 48,
         "description": "The King.",
-        "CID": null,
+        "cid": null,
         "alreadyUsed": false,
         "roundsLeft": 30,
         "MPS": 3,
@@ -22,7 +22,7 @@ let CardArr = {
         "y_px": 1, // 85px
         "frameNr": 1,
         "description": "The Queen.",
-        "CID": null,
+        "cid": null,
         "alreadyUsed": false,
         "roundsLeft": 30,
         "MPS": 3,

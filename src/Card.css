@@ -6,9 +6,11 @@
     /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
 }
 
-.Card:hover {
-    width: calc(5.5rem * 2);
-    height: calc(8.5rem * 2);
+.Card[hoverable="true"]:hover {
+    z-index: 1;
+    transform: scale(2);
+    /* width: calc(5.5rem * 2);
+    height: calc(8.5rem * 2); */
 }
 
 .Card .CardFG {
