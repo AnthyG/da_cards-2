@@ -132,7 +132,7 @@ class Card extends Component {
         const effects = C.effects;
 
         return (
-            <div className="Card" fob={fOb} hoverable={hoverable} style={style}>
+            <div className="Card" fob={fOb} hoverable={hoverable}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
