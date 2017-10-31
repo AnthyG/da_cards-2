@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 
 import PropTypes from 'prop-types';
-import { DragSource } from 'react-dnd';
+import { DragSource, DropTarget } from 'react-dnd';
+import flow from 'lodash/flow';
 
 import request from 'sync-request';
 
@@ -27,11 +28,8 @@ const Types = {
 
 const cardSource = {
     beginDrag(props) {
-        const C = {
-            type: props.type
-        };
-        log('beginDrag >>', C, props);
-        return C;
+        log('beginDrag >>', props);
+        return props; // this is sent to target's .drop
     },
     endDrag(props, monitor, component) {
         log('endDrag >>..', monitor.didDrop(), props, monitor, component);
@@ -39,25 +37,41 @@ const cardSource = {
             return;
 
         const C = monitor.getItem();
-        const dropResult = monitor.getDropResult();
+        const dropResult = monitor.getDropResult(); // this comes from target's .drop
         log('endDrag >>', C, dropResult, props, monitor, component);
     }
 };
-// const cardTarget = {
-//     drop(props, monitor) {
-//         const C = monitor.getItem();
-//         log('drop >>', C, props, monitor);
-//     }
-// }
-function collect(connect, monitor) {
-    log('collect >>', connect, monitor);
+function collectSource(connect, monitor) {
+    // log('collectSource >>', connect, monitor);
     return {
         connectDragSource: connect.dragSource(),
-        // connectDropTarget: connect.dropTarget(),
+        connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging()
-        // highlighted: monitor.canDrop(),
-        // hovered: monitor.isOver()
     };
+}
+
+const cardTarget = {
+    hover(props, monitor, component) {
+        // log('hover >>', props, monitor, component);
+    },
+    canDrop(props, monitor) {
+        // log('canDrop >>', props, monitor);
+        return true;
+    },
+    drop(props, monitor, component) {
+        const C = monitor.getItem(); // this comes from source's .beginDrag
+        log('drop >>', C, props, monitor, component);
+
+        return props; // this is sent to source's .endDrag
+    }
+};
+function collectTarget(connect, monitor) {
+    // log('collectTarget >>', connect, monitor);
+    return {
+        connectDropTarget: connect.dropTarget(),
+        highlighted: monitor.canDrop(),
+        hovered: monitor.isOver()
+    }
 }
 
 class CardFace extends Component {
@@ -126,13 +140,23 @@ class CardCorner extends Component {
 }
 
 class Card extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            fOb: this.props.fOb || "front",
+            draggable: this.props.draggable || "false",
+            hoverable: this.props.hoverable || "false"
+        };
+    }
+
     render() {
-        const hoverable = this.props.hoverable || "false";
+        const hoverable = this.state.hoverable;
+        const draggable = this.state.draggable;
+        const fOb = this.state.fOb;
 
-        const { connectDragSource, /*connectDropTarget,*/ isDragging, highlighted, hovered } = this.props;
-        log("DnD >>", connectDragSource, /*connectDropTarget,*/ isDragging, highlighted, hovered);
+        const { connectDragSource, connectDropTarget, connectDragPreview, isDragging } = this.props;
+        // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
 
-        const fOb = this.props.fOb;
         const type = this.props.type;
 
         // getCard(type);
@@ -177,8 +201,9 @@ class Card extends Component {
         const AT = C.AT;
         const effects = C.effects;
 
-        return connectDragSource(
-            <div className="Card" type={type} fob={fOb} hoverable={hoverable} isdragging={'"' + isDragging + '"'} highlighted={'"' + highlighted + '"'} hovered={'"' + hovered + '"'}>
+        const CardMark =
+            <div className="Card" type={type} fob={fOb}
+                hoverable={hoverable} isdragging={isDragging} draggable={draggable}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
@@ -189,14 +214,31 @@ class Card extends Component {
                 </div>
                 <div className="CardBG" tabIndex="-1"></div>
             </div>
-        );
+
+        if (draggable === "true")
+            return connectDragSource(connectDropTarget(connectDragPreview(
+                CardMark
+            ), {
+                    captureDraggingState: true
+                }
+            ));
+        else
+            return (
+                CardMark
+            );
     }
 }
 
 Card.propTypes = {
     connectDragSource: PropTypes.func.isRequired,
+    connectDropTarget: PropTypes.func.isRequired,
+    connectDragPreview: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired
 }
 
-export default DragSource(Types.CARD, cardSource, collect)(Card);
+export default flow(
+    DragSource(Types.CARD, cardSource, collectSource),
+    DropTarget(Types.CARD, cardTarget, collectTarget)
+)(Card);
+// export default DragSource(Types.CARD, cardSource, collectSource)(Card);
 // export default Card;
