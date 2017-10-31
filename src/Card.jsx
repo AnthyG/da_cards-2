@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
+import { DragSource } from 'react-dnd';
+
 import request from 'sync-request';
 
 import { log, err } from './logerr.js';
@@ -16,6 +20,45 @@ function getCard(type) {
     CardArr[type] = nCard;
 }
 // getCard('King');
+
+const Types = {
+    CARD: 'card'
+};
+
+const cardSource = {
+    beginDrag(props) {
+        const C = {
+            type: props.type
+        };
+        log('beginDrag >>', C, props);
+        return C;
+    },
+    endDrag(props, monitor, component) {
+        log('endDrag >>..', monitor.didDrop(), props, monitor, component);
+        if (!monitor.didDrop())
+            return;
+
+        const C = monitor.getItem();
+        const dropResult = monitor.getDropResult();
+        log('endDrag >>', C, dropResult, props, monitor, component);
+    }
+};
+// const cardTarget = {
+//     drop(props, monitor) {
+//         const C = monitor.getItem();
+//         log('drop >>', C, props, monitor);
+//     }
+// }
+function collect(connect, monitor) {
+    log('collect >>', connect, monitor);
+    return {
+        connectDragSource: connect.dragSource(),
+        // connectDropTarget: connect.dropTarget(),
+        isDragging: monitor.isDragging()
+        // highlighted: monitor.canDrop(),
+        // hovered: monitor.isOver()
+    };
+}
 
 class CardFace extends Component {
     constructor(props) {
@@ -86,6 +129,9 @@ class Card extends Component {
     render() {
         const hoverable = this.props.hoverable || "false";
 
+        const { connectDragSource, /*connectDropTarget,*/ isDragging, highlighted, hovered } = this.props;
+        log("DnD >>", connectDragSource, /*connectDropTarget,*/ isDragging, highlighted, hovered);
+
         const fOb = this.props.fOb;
         const type = this.props.type;
 
@@ -131,8 +177,8 @@ class Card extends Component {
         const AT = C.AT;
         const effects = C.effects;
 
-        return (
-            <div className="Card" fob={fOb} hoverable={hoverable} style={style}>
+        return connectDragSource(
+            <div className="Card" type={type} fob={fOb} hoverable={hoverable} isdragging={'"' + isDragging + '"'} highlighted={'"' + highlighted + '"'} hovered={'"' + hovered + '"'}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
@@ -147,4 +193,10 @@ class Card extends Component {
     }
 }
 
-export default Card;
+Card.propTypes = {
+    connectDragSource: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool.isRequired
+}
+
+export default DragSource(Types.CARD, cardSource, collect)(Card);
+// export default Card;
