@@ -6,11 +6,13 @@
     /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
 }
 
-.Card[hoverable="true"]:hover {
+.Card[hoverable="true"]:hover,
+.Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
     transform: scale(2);
     /* width: calc(5.5rem * 2);
     height: calc(8.5rem * 2); */
+    transform-origin: bottom;
 }
 
 .Card .CardFG {

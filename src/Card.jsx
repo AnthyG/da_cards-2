@@ -84,8 +84,7 @@ class CardCorner extends Component {
 
 class Card extends Component {
     render() {
-        const style = this.props.style;
-        const hoverable = this.props.hoverable || false;
+        const hoverable = this.props.hoverable || "false";
 
         const fOb = this.props.fOb;
         const type = this.props.type;

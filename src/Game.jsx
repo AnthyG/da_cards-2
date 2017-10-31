@@ -9,6 +9,7 @@ class RenderCardArr extends Component {
     render() {
         const dt = this.props.dt;
         const ooe = this.props.ooe;
+        const hoverable = this.props.hoverable || "false";
         const arr = this.props.arr;
         // log('arr >>', ooe, dt, arr);
 
@@ -17,21 +18,21 @@ class RenderCardArr extends Component {
             // rArr = arr.map((card) => 
             //     <Card key={y.cid} fOb="front" type={x} />
             // );
-            for (var x in arr) {
-                var y = arr[x];
+            for (let x in arr) {
+                let y = arr[x];
                 if (y !== null)
                     rArr.push(
-                        <Card fOb="front" type={y.type} hoverable={ooe === "own" ? "true" : "false"} key={ooe + '-' + dt + '-' + y.cid} />
+                        <Card fOb="front" type={y.type} hoverable={hoverable} key={ooe + '-' + dt + '-' + y.cid} />
                     );
                 else
                     rArr.push(
-                        <Card fOb="front" type="" hoverable={ooe === "own" ? "true" : "false"} key={ooe + '-' + dt + '-' + x.toString()} />
+                        <Card fOb="front" type="" hoverable={hoverable} key={ooe + '-' + dt + '-' + x.toString()} />
                     );
             }
         } else {
-            for (var x = 0; x < arr; x++) {
+            for (let x = 0; x < arr; x++) {
                 rArr.push(
-                    <Card fOb="back" type="" hoverable={ooe === "own" ? "true" : "false"} key={ooe + '-' + dt + '-' + x.toString()} />
+                    <Card fOb="back" type="" hoverable={hoverable} key={ooe + '-' + dt + '-' + x.toString()} />
                 )
             }
         }
@@ -50,7 +51,7 @@ class DeckHand extends Component {
 
         return (
             <div className="deck-hand" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="hand" ooe={ooe} />
+                <RenderCardArr arr={cards} dt="hand" ooe={ooe} hoverable={ooe === "own" && "true"} />
             </div>
         );
     }
@@ -63,7 +64,7 @@ class DeckField extends Component {
 
         return (
             <div className="deck-field" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="field" ooe={ooe} />
+                <RenderCardArr arr={cards} dt="field" ooe={ooe} hoverable="dynamic" />
             </div>
         );
     }
@@ -76,7 +77,7 @@ class DeckBlock extends Component {
 
         return (
             <div className="deck-block" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="block" ooe={ooe} />
+                <RenderCardArr arr={cards} dt="block" ooe={ooe} hoverable="false" />
             </div>
         );
     }
