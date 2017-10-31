@@ -36,9 +36,22 @@ const cardSource = {
         if (!monitor.didDrop())
             return;
 
-        const C = monitor.getItem();
-        const dropResult = monitor.getDropResult(); // this comes from target's .drop
-        log('endDrag >>', C, dropResult, props, monitor, component);
+        const C1 = monitor.getItem(); // === props
+        const C2 = monitor.getDropResult(); // this comes from target's .drop
+        log('endDrag >>', C1, C2, props, monitor, component);
+
+        C1.movecard({
+            'c1': {
+                dt: C1.dt,
+                position: C1.position,
+                side: C1.ooe
+            },
+            'c2': {
+                dt: C2.dt,
+                position: C2.position,
+                side: C2.ooe
+            }
+        });
     }
 };
 function collectSource(connect, monitor) {
@@ -59,10 +72,10 @@ const cardTarget = {
         return true;
     },
     drop(props, monitor, component) {
-        const C = monitor.getItem(); // this comes from source's .beginDrag
-        log('drop >>', C, props, monitor, component);
+        const C1 = monitor.getItem(); // this comes from source's .beginDrag
+        log('drop >>', C1, props, monitor, component);
 
-        return props; // this is sent to source's .endDrag
+        return props; // this is sent to source's .endDrag (getDropResult)
     }
 };
 function collectTarget(connect, monitor) {
@@ -156,6 +169,9 @@ class Card extends Component {
         // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
 
         const type = this.props.type || "";
+        const position = this.props.position;
+        const dt = this.props.dt;
+        const ooe = this.props.ooe;
 
         const dragable = this.props.dragable || "false";
         const dropable = this.props.dropable || "false";
@@ -191,9 +207,10 @@ class Card extends Component {
 
         const CardMark =
             <div className="Card" type={type} fob={fOb}
+                dt={dt} position={position} ooe={ooe}
                 hoverable={hoverable}
                 dragable={dragable} dropable={dropable}
-                isdragging={isDragging}>
+                isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>

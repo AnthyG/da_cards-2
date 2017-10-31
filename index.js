@@ -285,6 +285,48 @@ io.on('connection', function(socket) {
     }
     socket.on('gameStarted', gameStarted);
 
+    function moveCard(c1toc2) {
+        const cgid = userlists.eo[socket.username].gid;
+        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+        log('moveCard >>', c1toc2);
+
+        var mverr = false;
+        if (!c1toc2.hasOwnProperty('c1') || !c1toc2.hasOwnProperty('c2')) {
+            sendLog('moveCard >> failed because one/ both card\'s are missing!');
+            mverr = true;
+        }
+        if (mverr) {
+            sendGame();
+            return false;
+        }
+
+        const C1 = c1toc2.c1,
+            C2 = c1toc2.c2;
+
+        const sdttosdt = (((C1.side === "enemy" ? "e" : "o") + (C1.dt === "onHand" ? "h" : (C1.dt === "onField" ? "f" : ""))) +
+            '-' +
+            ((C2.side === "enemy" ? "e" : "o") + (C2.dt === "onHand" ? "h" : (C2.dt === "onField" ? "f" : "")))
+        );
+        log('moveCard 2 >>', C1, C2, sdttosdt);
+
+        if (socket.username === userlists.g[cgid].currentPlayer || sdttosdt === "oh-oh") {
+            if (sdttosdt === "oh-oh") {
+                var oldc1 = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
+                log(oldc1, userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position]);
+
+                userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position] = userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position];
+                userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position] = oldc1;
+                log(userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position], userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position]);
+
+                // log('movedCard 3 >>', sdttosdt);
+            }
+        }
+
+        sendGame();
+    }
+    socket.on('moveCard', moveCard);
+
     function endGame(wincause) {
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;

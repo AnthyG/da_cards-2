@@ -27,24 +27,29 @@ class RenderCardArr extends Component {
                 let y = arr[x];
                 if (y !== null)
                     rArr.push(
-                        <Card fOb="front" type={y.type}
+                        <Card fOb="front" type={y.type} dt={dt} position={x} ooe={ooe}
                             hoverable={hoverable}
                             dragable={dragable} dropable={dropable}
-                            key={ooe + '-' + dt + '-' + y.cid} />
+                            key={ooe + '-' + dt + '-' + x}
+                            movecard={this.props.movecard} />
                     );
                 else
                     rArr.push(
-                        <Card fOb="front" type="" hoverable={hoverable}
-                            hoverable={hoverable} dragable="false" dropable={dropable}
-                            key={ooe + '-' + dt + '-' + x.toString()} />
+                        <Card fOb="front" type="" dt={dt} position={x} ooe={ooe}
+                            hoverable={hoverable}
+                            dragable="false" dropable={dropable}
+                            key={ooe + '-' + dt + '-' + x}
+                            movecard={this.props.movecard} />
                     );
             }
         } else {
             for (let x = 0; x < arr; x++) {
                 rArr.push(
-                    <Card fOb="back" type="" hoverable={hoverable}
-                        hoverable={hoverable} dragable="false" dropable="false"
-                        key={ooe + '-' + dt + '-' + x.toString()} />
+                    <Card fOb="back" type="" dt={dt} position={x} ooe={ooe}
+                        hoverable={hoverable}
+                        dragable="false" dropable="false"
+                        key={ooe + '-' + dt + '-' + x}
+                        movecard={this.props.movecard} />
                 )
             }
         }
@@ -56,49 +61,52 @@ class RenderCardArr extends Component {
     }
 }
 
-class DeckHand extends Component {
+class DeckOnHand extends Component {
     render() {
         const cards = this.props.cards;
         const ooe = this.props.ooe;
 
         return (
-            <div className="deck-hand" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="hand" ooe={ooe}
+            <div className="deck-onHand" ooe={ooe}>
+                <RenderCardArr arr={cards} dt="onHand" ooe={ooe}
                     hoverable={ooe === "own" && "true"}
                     dragable={ooe === "own" && "true"}
-                    dropable={ooe === "own" && "true"} />
+                    dropable={ooe === "own" && "true"}
+                    movecard={this.props.movecard} />
             </div>
         );
     }
 }
 
-class DeckField extends Component {
+class DeckOnField extends Component {
     render() {
         const cards = this.props.cards;
         const ooe = this.props.ooe;
 
         return (
-            <div className="deck-field" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="field" ooe={ooe}
+            <div className="deck-onField" ooe={ooe}>
+                <RenderCardArr arr={cards} dt="onField" ooe={ooe}
                     hoverable="dynamic"
                     dragable={ooe === "own" && "true"}
-                    dropable="true" />
+                    dropable="true"
+                    movecard={this.props.movecard} />
             </div>
         );
     }
 }
 
-class DeckBlock extends Component {
+class DeckInBlock extends Component {
     render() {
         const cards = this.props.cards;
         const ooe = this.props.ooe;
 
         return (
-            <div className="deck-block" ooe={ooe}>
-                <RenderCardArr arr={cards} dt="block" ooe={ooe}
+            <div className="deck-inBlock" ooe={ooe}>
+                <Card fOb="back" type="" dt="inBlock" position="0" ooe={ooe}
                     hoverable="false"
-                    dragable="false"
-                    dropable="false" />
+                    dragable="false" dropable="false"
+                    movecard={this.props.movecard} />
+                <span className="deck-inBlock-nr">{cards}</span>
             </div>
         );
     }
@@ -111,9 +119,9 @@ class GameDeck extends Component {
 
         return (
             <div className="deck" ooe={ooe}>
-                <DeckBlock cards={P.deck.inBlock} ooe={ooe} />
-                <DeckHand cards={P.deck.onHand} ooe={ooe} />
-                <DeckField cards={P.deck.onField} ooe={ooe} />
+                <DeckInBlock cards={P.deck.inBlock} ooe={ooe} movecard={this.props.movecard} />
+                <DeckOnHand cards={P.deck.onHand} ooe={ooe} movecard={this.props.movecard} />
+                <DeckOnField cards={P.deck.onField} ooe={ooe} movecard={this.props.movecard} />
             </div>
         );
     }
@@ -128,6 +136,7 @@ class Game extends Component {
         };
 
         this.handleShowMenuToggle = this.handleShowMenuToggle.bind(this);
+        this.moveCard = this.moveCard.bind(this);
 
         const dis = this;
         socket.on('game', function (g) {
@@ -147,21 +156,26 @@ class Game extends Component {
         });
     }
 
+    moveCard(c1toc2) {
+        log('moveCard >>', c1toc2);
+        socket.emit('moveCard', c1toc2);
+    }
+
     componentDidMount() {
         // THIS LOOP CAN BE DISABLED, WHEN THE CARD-MOVING-SYSTEM IS SOMEWHAT RUNNING!
-        this.timerID = setInterval(
-            () => this.tick(),
-            10000000000
-            // 250
-        );
+        // this.timerID = setInterval(
+        //     () => this.tick(),
+        //     10000000000
+        //     // 250
+        // );
     }
 
     componentWillUnmount() {
-        clearInterval(this.timerID);
+        // clearInterval(this.timerID);
     }
 
     tick() {
-        socket.emit('getGame');
+        // socket.emit('getGame');
     }
 
     render() {
@@ -176,8 +190,8 @@ class Game extends Component {
             <div className="App-game">
                 <a href="#Menu-toggle" className="App-game-menu-toggle" onClick={(e) => this.handleShowMenuToggle(e)}>Menu</a>
                 <div className={"App-game-decks show-menu-" + this.state.show_menu}>
-                    <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" />
-                    <GameDeck p={g.Players[iAmNr]} ooe="own" />
+                    <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
+                    <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />
                 </div>
             </div>
         );
