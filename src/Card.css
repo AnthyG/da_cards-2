@@ -15,6 +15,10 @@
     transform-origin: bottom;
 }
 
+.Card[draggable="true"]:hover {
+    cursor: pointer;
+}
+
 .Card .CardFG {
     transform: rotateY(0deg);
     background: url(/Cards/Card%20Front.png) center center no-repeat;
@@ -92,6 +96,7 @@
 }
 
 .Card[fOb="back"] .CardFace,
-.Card[fOb="back"] .CardCorner {
+.Card[fOb="back"] .CardCorner,
+.Card[type=""] .CardCorner {
     display: none;
 }

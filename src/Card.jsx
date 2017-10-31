@@ -144,50 +144,38 @@ class Card extends Component {
         super(props);
         this.state = {
             fOb: this.props.fOb || "front",
-            draggable: this.props.draggable || "false",
             hoverable: this.props.hoverable || "false"
         };
     }
 
     render() {
-        const hoverable = this.state.hoverable;
-        const draggable = this.state.draggable;
-        const fOb = this.state.fOb;
+        const hoverable = this.state.hoverable || "false";
+        const fOb = this.state.fOb || "front";
 
         const { connectDragSource, connectDropTarget, connectDragPreview, isDragging } = this.props;
         // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
 
-        const type = this.props.type;
+        const type = this.props.type || "";
+
+        const dragable = this.props.dragable || "false";
+        const dropable = this.props.dropable || "false";
 
         // getCard(type);
 
-        var C = { // Type/Name of the card
-            "type": "", // Type/Name of the card
-
-            "x_px": 0, // 495px // How many frames on x-axis (*55px)
-            "y_px": 0, // 510px // How many frames on y-axis (*85px)
-            "frameNr": 0, // Total number of frames
-
-            "description": "", // Description of this card (will be shown on card-hover)
-
+        var C = {
+            "type": "",
+            "x_px": 0,
+            "y_px": 0,
+            "frameNr": 0,
+            "description": "",
             "cid": null,
-            "alreadyUsed": false, // if this card has already been played in "this" round
-            "roundsLeft": 0, // rounds left, until this card will be destroyed (-1 for infinite)
-
-            "MPS": 0, // required Mana-Points to summon this card
-            "HP": 0, // Health-Points
-
-            "AP": 0, // Attack-Points
-            "AT": "", // Attack-Type (Magical || Physical)
-
-            "effects":
-            // The effects (own and enemy) that are currently on this card,
-            // and their roundsLeft (gets applied after push to deck, so it can be pretty much everything)
-            // Effects can already be in here, which are called summon-effects
-            // They will be shown on card-hover
-            {
-                // Effecttype/-name: roundsLeft
-            }
+            "alreadyUsed": false,
+            "roundsLeft": 0,
+            "MPS": 0,
+            "HP": 0,
+            "AP": 0,
+            "AT": "",
+            "effects": {}
         };
         if (CardArr.hasOwnProperty(type))
             C = CardArr[type];
@@ -203,7 +191,9 @@ class Card extends Component {
 
         const CardMark =
             <div className="Card" type={type} fob={fOb}
-                hoverable={hoverable} isdragging={isDragging} draggable={draggable}>
+                hoverable={hoverable}
+                dragable={dragable} dropable={dropable}
+                isdragging={isDragging}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
@@ -215,13 +205,22 @@ class Card extends Component {
                 <div className="CardBG" tabIndex="-1"></div>
             </div>
 
-        if (draggable === "true")
+        if (dragable === "true" && dropable === "true")
             return connectDragSource(connectDropTarget(connectDragPreview(
-                CardMark
-            ), {
+                CardMark, {
+                    captureDraggingState: true
+                }
+            )));
+        else if (dragable === "true" && dropable === "false")
+            return connectDragSource(connectDragPreview(
+                CardMark, {
                     captureDraggingState: true
                 }
             ));
+        else if (dragable === "false" && dropable === "true")
+            return connectDropTarget(
+                CardMark
+            );
         else
             return (
                 CardMark
