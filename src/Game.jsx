@@ -155,6 +155,7 @@ class Game extends Component {
 
         this.handleShowMenuToggle = this.handleShowMenuToggle.bind(this);
         this.moveCard = this.moveCard.bind(this);
+        this.nextRound = this.nextRound.bind(this);
 
         const dis = this;
         socket.on('game', function (g) {
@@ -177,6 +178,13 @@ class Game extends Component {
     moveCard(c1toc2) {
         log('moveCard >>', c1toc2);
         socket.emit('moveCard', c1toc2);
+    }
+
+    nextRound(event) {
+        event.preventDefault();
+
+        log('nextRound >>');
+        socket.emit('nextRound');
     }
 
     componentDidMount() {
@@ -213,11 +221,16 @@ class Game extends Component {
                     <span className="roundLength">roundLength: {g.roundLength}</span><br />
                     <span className="timeRunning">timeRunning: {g.timeRunning}</span><br />
                     <span className="roundNumber">roundNumber: {g.roundNumber}</span><br />
-                    <span className="currentPlayer">{g.currentPlayer}</span>
+                    <span className="currentPlayer">currentPlayer: {g.currentPlayer}</span><br />
+                    <span className="Winner">Winner: {g.Winner}</span><br />
+                    <span className="WinCause">WinCause: {g.WinCause}</span>
                 </div>
 
                 <div className={"App-game-decks show-menu-" + this.state.show_menu}>
-                    <span className="currentPlayer">{g.currentPlayer}</span>
+                    {username === g.currentPlayer ?
+                        <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>{g.currentPlayer}</a> :
+                        <a className="currentPlayer">{g.currentPlayer}</a>
+                    }
 
                     <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
                     <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />

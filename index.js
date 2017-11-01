@@ -308,18 +308,20 @@ io.on('connection', function(socket) {
 
     function gameLoop() {
         const cgid = userlists.eo[socket.username].gid;
-        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+        if (cgid !== null) {
+            const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
-        if (userlists.g[cgid].timeRunning < userlists.g[cgid].roundLength) {
-            userlists.g[cgid].timeRunning++;
-        } else if (userlists.g[cgid].timeRunning >= userlists.g[cgid].roundLength) {
-            nextRound();
-        }
+            if (userlists.g[cgid].timeRunning < userlists.g[cgid].roundLength) {
+                userlists.g[cgid].timeRunning++;
+            } else if (userlists.g[cgid].timeRunning >= userlists.g[cgid].roundLength) {
+                nextRound();
+            }
 
-        if (userlists.g[cgid].Winner === null && userlists.g[cgid].WinCause === null) {
-            setTimeout(function() {
-                gameLoop();
-            }, 1000);
+            if (userlists.g[cgid].Winner === null && userlists.g[cgid].WinCause === null) {
+                setTimeout(function() {
+                    gameLoop();
+                }, 1000);
+            }
         }
     }
 
@@ -328,6 +330,12 @@ io.on('connection', function(socket) {
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
         if (socket.username === userlists.g[cgid].currentPlayer || userlists.g[cgid].timeRunning >= userlists.g[cgid].roundLength) {
+            userlists.g[cgid].timeRunning = 0;
+            userlists.g[cgid].roundNumber++;
+
+            const lastPlayerNr = userlists.g[cgid].currentPlayer === userlists.g[cgid].Players[0].User.name ? 0 : 1;
+            userlists.g[cgid].currentPlayer = userlists.g[cgid].Players[lastPlayerNr === 0 ? 1 : 0].User.name;
+
             for (var px = 0; px < 2; px++) {
                 for (var cx in userlists.g[cgid].Players[px].deck.onField) {
                     if (userlists.g[cgid].Players[px].deck.onField[cx] !== null) {
@@ -344,19 +352,32 @@ io.on('connection', function(socket) {
                         }
                     }
                 }
+
+                // Set MP back to 20
+                userlists.g[cgid].Players[px].MP = 20;
+
+                // Serve new card from block into hand,
+                // if lastPlayerNr is this px,
+                // if the maximum of 15 cards in onHand hasn't been reached yet,
+                // and if any cards are left in inBlock
+                if (lastPlayerNr !== px &&
+                    Object.keys(userlists.g[cgid].Players[px].deck.onHand).length < 15 &&
+                    Object.keys(userlists.g[cgid].Players[px].deck.inBlock).length > 0) {
+
+                    const scard = JSON.parse(JSON.stringify(userlists.g[cgid].Players[px].deck.inBlock[Object.keys(userlists.g[cgid].Players[px].deck.inBlock)[0]]));
+                    // Put card from inBlock into onHand
+                    userlists.g[cgid].Players[px].deck.onHand[Object.keys(userlists.g[cgid].Players[px].deck.onHand).length] = scard;
+
+                    // Remove card from inBlock
+                    delete userlists.g[cgid].Players[px].deck.inBlock[Object.keys(userlists.g[cgid].Players[px].deck.inBlock)[0]];
+                }
             }
-
-            userlists.g[cgid].timeRunning = 0;
-            userlists.g[cgid].roundNumber++;
-
-            const curPlayerNr = userlists.g[cgid].currentPlayer === userlists.g[cgid].Players[0].User.name ? 0 : 1;
-            userlists.g[cgid].currentPlayer = userlists.g[cgid].Players[curPlayerNr === 0 ? 1 : 0].User.name;
 
             sendGame(true);
 
-            if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[curPlayerNr].roundsOff < 3) {
-                userlists.g[cgid].Players[curPlayerNr].roundsOff++;
-            } else if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[curPlayerNr].roundsOff === 3) {
+            if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[lastPlayerNr].roundsOff < 3) {
+                userlists.g[cgid].Players[lastPlayerNr].roundsOff++;
+            } else if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[lastPlayerNr].roundsOff === 3) {
                 endGame('afk');
             }
         }
@@ -367,7 +388,7 @@ io.on('connection', function(socket) {
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
-        log('moveCard >>', c1toc2);
+        // log('moveCard >>', c1toc2);
 
         var mverr = false;
         if (!c1toc2.hasOwnProperty('c1') || !c1toc2.hasOwnProperty('c2')) {
@@ -386,7 +407,7 @@ io.on('connection', function(socket) {
             '-' +
             ((C2.side === "enemy" ? "e" : "o") + (C2.dt === "onHand" ? "h" : (C2.dt === "onField" ? "f" : "")))
         );
-        log('moveCard 2 >>', C1, C2, sdttosdt);
+        // log('moveCard 2 >>', C1, C2, sdttosdt);
 
         var sendToEnemy = false;
         if (socket.username === userlists.g[cgid].currentPlayer || sdttosdt === "oh-oh") {

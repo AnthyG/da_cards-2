@@ -128,7 +128,7 @@ class CardFace extends Component {
 
         return (
             <div className="CardFace"
-                style={{
+                style={type === "" ? { borderImage: 'url() fill' } : {
                     borderImage: 'url(/Cards/Card-PNGs/' + type +
                     '_Icon_Bordered.png) calc(85 * ' + cy + ') calc(55 * ' + cxm +
                     ') calc(85 * ' + cym + ') calc(55 * ' + cx + ') fill'
