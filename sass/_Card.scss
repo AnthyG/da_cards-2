@@ -1,0 +1,91 @@
+.Card {
+    margin: 0.25rem;
+    user-select: none;
+    position: relative;
+    width: calc(5.5rem * 1);
+    height: calc(8.5rem * 1);
+    font-family: FFFFORWA;
+    font-stretch: condensed;
+    font-style: normal;
+    font-weight: 100;
+    font-size: 0.675rem;
+    transition: all .1s cubic-bezier(0.075, 0.82, 0.165, 1);
+    /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
+    &[hoverable="true"]:hover,
+    &[hoverable="dynamic"]:not([type=""]):hover {
+        z-index: 1;
+        transform: scale(2);
+        /* width: calc(5.5rem * 2);
+        height: calc(8.5rem * 2); */
+        transform-origin: bottom;
+    }
+    &[draggable="true"]:hover {
+        cursor: pointer;
+    }
+    & .CardFG {
+        transform: rotateY(0deg);
+        background: url(/Cards/Card%20Front.png) center center no-repeat;
+    }
+    & .CardBG {
+        transform: rotateY(180deg);
+        background: url(/Cards/Card%20Back.png) center center no-repeat;
+    }
+    & .CardFG,
+    & .CardBG {
+        transition: all .5s cubic-bezier(0.075, 0.82, 0.165, 1);
+    }
+    &[fOb="back"] {
+        /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 6px 8px; */
+        & .CardFG {
+            transform: rotateY(180deg);
+        }
+        & .CardBG {
+            transform: rotateY(360deg);
+        }
+    }
+    & .CardFG,
+    & .CardBG,
+    & .CardFace {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        backface-visibility: hidden;
+        background-repeat: no-repeat;
+        background-size: cover;
+        image-rendering: optimizeSpeed;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -o-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: pixelated;
+        image-rendering: optimize-contrast;
+        -ms-interpolation-mode: nearest-neighbor;
+    }
+    & .CardName {
+        left: 50%;
+        bottom: 10%;
+        position: absolute;
+        transform: translateX(-50%);
+    }
+    & .CardCorner {
+        top: 0;
+        left: 0;
+        position: absolute;
+        &[posX="R"] {
+            right: 0;
+            left: initial;
+        }
+        &[posY="B"] {
+            bottom: 0;
+            top: initial;
+        }
+    }
+    &[fOb="back"] .CardFace,
+    &[fOb="back"] .CardCorner,
+    &[type=""] .CardCorner {
+        display: none;
+    }
+}

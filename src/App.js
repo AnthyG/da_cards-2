@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import './App.css';
 
 import TouchBackend from 'react-dnd-touch-backend';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -10,9 +9,7 @@ import { log, err } from './logerr.js';
 
 import { socket } from './socket.js';
 
-import './Card.css';
 import Card from './Card.jsx';
-import './Game.css';
 import Game from './Game.jsx';
 
 class FormLogin extends Component {
