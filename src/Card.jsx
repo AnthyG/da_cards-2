@@ -5,17 +5,18 @@ import { DragSource, DropTarget } from 'react-dnd';
 import flow from 'lodash/flow';
 
 import request from 'sync-request';
+import { s_address } from './addresses.js';
 
 import { log, err } from './logerr.js';
 
 var CardArr = {};
 function getCardArr() {
-    const resCardArr = request('GET', 'http://localhost:3000/cards');
+    const resCardArr = request('GET', s_address + '/cards');
     CardArr = JSON.parse(resCardArr.body);
 }
 getCardArr();
 function getCard(type) {
-    const resCard = request('GET', 'http://localhost:3000/card/' + type);
+    const resCard = request('GET', s_address + '/card/' + type);
     var nCard;
     eval('nCard = ' + resCard.body);
     CardArr[type] = nCard;
@@ -209,7 +210,7 @@ class Card extends Component {
             <div className="Card" type={type} fob={fOb}
                 dt={dt} position={position} ooe={ooe}
                 hoverable={hoverable}
-                dragable={dragable} dropable={dropable}
+                draggable={dragable} dropable={dropable}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />

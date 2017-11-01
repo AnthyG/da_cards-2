@@ -112,6 +112,20 @@ class DeckInBlock extends Component {
     }
 }
 
+class PlayerInfo extends Component {
+    render() {
+        const P = this.props.p;
+        const ooe = this.props.ooe;
+
+        return (
+            <div className="PlayerInfo" ooe={ooe}>
+                <span className="PlayerName">{P.User.name}</span>&nbsp;
+                <span className="MP">{P.MP}</span>
+            </div>
+        );
+    }
+}
+
 class GameDeck extends Component {
     render() {
         const P = this.props.p;
@@ -119,9 +133,13 @@ class GameDeck extends Component {
 
         return (
             <div className="deck" ooe={ooe}>
-                <DeckInBlock cards={P.deck.inBlock} ooe={ooe} movecard={this.props.movecard} />
-                <DeckOnHand cards={P.deck.onHand} ooe={ooe} movecard={this.props.movecard} />
-                <DeckOnField cards={P.deck.onField} ooe={ooe} movecard={this.props.movecard} />
+                <PlayerInfo p={P} ooe={ooe} />
+                <DeckInBlock cards={P.deck.inBlock} ooe={ooe}
+                    movecard={this.props.movecard} />
+                <DeckOnHand cards={P.deck.onHand} ooe={ooe}
+                    movecard={this.props.movecard} />
+                <DeckOnField cards={P.deck.onField} ooe={ooe}
+                    movecard={this.props.movecard} />
             </div>
         );
     }
@@ -189,7 +207,18 @@ class Game extends Component {
         return (
             <div className="App-game">
                 <a href="#Menu-toggle" className="App-game-menu-toggle" onClick={(e) => this.handleShowMenuToggle(e)}>Menu</a>
+
+                <div className="App-game-info">
+                    <span className="Creationdate">Creationdate: {g.Creationdate}</span><br />
+                    <span className="roundLength">roundLength: {g.roundLength}</span><br />
+                    <span className="timeRunning">timeRunning: {g.timeRunning}</span><br />
+                    <span className="roundNumber">roundNumber: {g.roundNumber}</span><br />
+                    <span className="currentPlayer">{g.currentPlayer}</span>
+                </div>
+
                 <div className={"App-game-decks show-menu-" + this.state.show_menu}>
+                    <span className="currentPlayer">{g.currentPlayer}</span>
+
                     <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
                     <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />
                 </div>
