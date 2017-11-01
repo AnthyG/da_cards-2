@@ -86,7 +86,7 @@ var userlists = {
                     'name': user_1_name,
                     'id': user_1_id
                 },
-                'roundsOFF': 0,
+                'roundsOff': 0,
                 'deck': {
                     'onHand': {},
                     'onField': {},
@@ -99,7 +99,7 @@ var userlists = {
                     'name': user_2_name,
                     'id': user_2_id
                 },
-                'roundsOFF': 0,
+                'roundsOff': 0,
                 'deck': {
                     'onHand': {},
                     'onField': {},
@@ -146,7 +146,8 @@ io.on('connection', function(socket) {
     }
     socket.on('getUserlist', sendUserlist);
 
-    function sendGame(gid) {
+    function sendGame(alsoToEnemy, gid) {
+        const sendToEnemy = alsoToEnemy || false;
         const cgid = gid || userlists.eo[socket.username].gid;
 
         if (cgid !== null) {
@@ -158,6 +159,17 @@ io.on('connection', function(socket) {
             g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock).length;
 
             socket.emit('game', g);
+
+            if (sendToEnemy) {
+                var g2 = JSON.parse(JSON.stringify(userlists.g[cgid]));
+                const eIsNr = userlists.g[cgid].Players[0].User.name === socket.username ? 1 : 0;
+
+                g2.Players[eIsNr].deck.inBlock = Object.keys(g2.Players[eIsNr].deck.inBlock).length;
+                g2.Players[(eIsNr === 0 ? 1 : 0)].deck.onHand = Object.keys(g2.Players[(eIsNr === 0 ? 1 : 0)].deck.onHand).length;
+                g2.Players[(eIsNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g2.Players[(eIsNr === 0 ? 1 : 0)].deck.inBlock).length;
+
+                socket.broadcast.to(cgid).emit('game', g2);
+            }
         }
     }
     socket.on('getGame', sendGame);
@@ -202,26 +214,26 @@ io.on('connection', function(socket) {
                         'name': socket.username,
                         'id': socket.id
                     },
-                    'roundsOFF': 0,
+                    'roundsOff': 0,
                     'deck': {
                         'onHand': {},
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MPLeft': 20
+                    'MP': 20
                 },
                 1: {
                     'User': {
                         'name': odata.username,
                         'id': odata.id
                     },
-                    'roundsOFF': 0,
+                    'roundsOff': 0,
                     'deck': {
                         'onHand': {},
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MPLeft': 20
+                    'MP': 20
                 }
             },
             'Creationdate': Date().toString(),
@@ -275,7 +287,16 @@ io.on('connection', function(socket) {
         }
 
         // DON'T FORGET TO FILTER OUT THE OTHER USER's .onHand AND FOR BOTH THE .inBlock!
-        io.in(cgid).emit('gameStarted', userlists.g[cgid]);
+        var g = JSON.parse(JSON.stringify(userlists.g[cgid]));
+        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+        g.Players[iAmNr].deck.inBlock = Object.keys(g.Players[iAmNr].deck.inBlock).length;
+        g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand).length;
+        g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock).length;
+
+        io.in(cgid).emit('gameStarted', g);
+
+        gameLoop();
     }
     socket.on('startGame', startGame);
 
@@ -285,14 +306,182 @@ io.on('connection', function(socket) {
     }
     socket.on('gameStarted', gameStarted);
 
+    function gameLoop() {
+        const cgid = userlists.eo[socket.username].gid;
+        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+        if (userlists.g[cgid].timeRunning < userlists.g[cgid].roundLength) {
+            userlists.g[cgid].timeRunning++;
+        } else if (userlists.g[cgid].timeRunning >= userlists.g[cgid].roundLength) {
+            nextRound();
+        }
+
+        if (userlists.g[cgid].Winner === null && userlists.g[cgid].WinCause === null) {
+            setTimeout(function() {
+                gameLoop();
+            }, 1000);
+        }
+    }
+
+    function nextRound() {
+        const cgid = userlists.eo[socket.username].gid;
+        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+        if (socket.username === userlists.g[cgid].currentPlayer || userlists.g[cgid].timeRunning >= userlists.g[cgid].roundLength) {
+            for (var px = 0; px < 2; px++) {
+                for (var cx in userlists.g[cgid].Players[px].deck.onField) {
+                    if (userlists.g[cgid].Players[px].deck.onField[cx] !== null) {
+                        // Check if the card has an effect, which disables it's ability to be used,
+                        // and set alreadyUsed accordingly
+                        userlists.g[cgid].Players[px].deck.onField[cx].alreadyUsed = false;
+
+                        if (userlists.g[cgid].Players[px].deck.onField[cx].roundsLeft >= 1) {
+                            userlists.g[cgid].Players[px].deck.onField[cx].roundsLeft--;
+                        } else {
+                            // Check if the card has an effect, that get's called on-death, and execute it,
+                            // Afterwards, delete the card
+                            userlists.g[cgid].Players[px].deck.onField[cx] = null;
+                        }
+                    }
+                }
+            }
+
+            userlists.g[cgid].timeRunning = 0;
+            userlists.g[cgid].roundNumber++;
+
+            const curPlayerNr = userlists.g[cgid].currentPlayer === userlists.g[cgid].Players[0].User.name ? 0 : 1;
+            userlists.g[cgid].currentPlayer = userlists.g[cgid].Players[curPlayerNr === 0 ? 1 : 0].User.name;
+
+            sendGame(true);
+
+            if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[curPlayerNr].roundsOff < 3) {
+                userlists.g[cgid].Players[curPlayerNr].roundsOff++;
+            } else if (userlists.o.indexOf(userlists.g[cgid].currentPlayer) === -1 && userlists.g[cgid].Players[curPlayerNr].roundsOff === 3) {
+                endGame('afk');
+            }
+        }
+    }
+    socket.on('nextRound', nextRound);
+
+    function moveCard(c1toc2) {
+        const cgid = userlists.eo[socket.username].gid;
+        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+
+        log('moveCard >>', c1toc2);
+
+        var mverr = false;
+        if (!c1toc2.hasOwnProperty('c1') || !c1toc2.hasOwnProperty('c2')) {
+            sendLog('moveCard >> failed because one/ both card\'s are missing!');
+            mverr = true;
+        }
+        if (mverr) {
+            sendGame();
+            return false;
+        }
+
+        const C1 = c1toc2.c1,
+            C2 = c1toc2.c2;
+
+        const sdttosdt = (((C1.side === "enemy" ? "e" : "o") + (C1.dt === "onHand" ? "h" : (C1.dt === "onField" ? "f" : ""))) +
+            '-' +
+            ((C2.side === "enemy" ? "e" : "o") + (C2.dt === "onHand" ? "h" : (C2.dt === "onField" ? "f" : "")))
+        );
+        log('moveCard 2 >>', C1, C2, sdttosdt);
+
+        var sendToEnemy = false;
+        if (socket.username === userlists.g[cgid].currentPlayer || sdttosdt === "oh-oh") {
+            if (sdttosdt === "oh-oh") {
+                var oldc1 = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
+
+                userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position] = userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position];
+                userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position] = oldc1;
+            } else if (sdttosdt === "oh-of") {
+                // Check if the player has enough MP to summon the card,
+                // if that field is available for summon's,
+                // and if there already is a card on that field
+                if (userlists.g[cgid].Players[iAmNr].MP >= userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].MPS) {
+                    // Check, if the card is even able to get summoned on this field
+
+                    if (userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position]) { // If there is a card..
+                        // Direct-actions/-effects will be applied here!
+                        sendToEnemy = true;
+                    } else { // If there is no card..
+                        // Put the card from onHand to onField, and take appropiate mana from the player
+                        userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position] = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
+
+                        // If the card hasn't got the instant-use effect
+                        if (!userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].effects.hasOwnProperty('instant-use'))
+                            userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].alreadyUsed = true;
+
+                        delete userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
+
+                        userlists.g[cgid].Players[iAmNr].MP -= userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].MPS;
+
+                        sendToEnemy = true;
+                    }
+                }
+            } else if (sdttosdt === "of-ef") {
+                // Check if the card hasn't already been used,
+                // and if there are cards on the enemies field, which can prevent this action from happening
+                // Depending on that, apply damage/effects etc, set the card's alreadyUsed = true, and what not
+                // ?Maybe also a MP (not MPS), which requires the player to have enough mana, to use this card!?
+                if (!userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].alreadyUsed &&
+                    userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt].hasOwnProperty(C2.position) &&
+                    userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position] !== null) {
+
+                    userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].alreadyUsed = true;
+
+                    var c1_HP = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].HP;
+                    var c2_HP = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].HP;
+                    var c1_AP = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].AP;
+                    var c2_AP = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].AP;
+
+                    for (var attacks = 0; attacks < c1_AP; attacks++) {
+                        if (c2_HP > 0) {
+                            c2_HP--;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (c2_HP > 0) {
+                        userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].HP = c2_HP;
+                        for (var attacks = 0; attacks < c1_HP; attacks++) {
+                            if (c1_HP > 0) {
+                                c1_HP--;
+                            } else {
+                                break;
+                            }
+                        }
+                        if (c1_HP > 0) {
+                            userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].HP = c1_HP;
+                        } else if (c1_HP === 0) {
+                            userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position] = null;
+                            sendLog(C1 + " of yours has been destroyed by " + (iAmNr === 0 ? 1 : 0) + " with " + C2);
+                        }
+                    } else if (c2_HP === 0) {
+                        userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position] = null;
+                        sendLog(C2 + " of " + (iAmNr === 0 ? 1 : 0) + " has been destroyed by you with " + C1);
+                    }
+
+                    sendToEnemy = true;
+                }
+            }
+        }
+
+        sendGame(sendToEnemy);
+    }
+    socket.on('moveCard', moveCard);
+
     function endGame(wincause) {
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
-        userlists.g[cgid].Winner = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name;
-        userlists.g[cgid].WinCause = wincause;
+        if (userlists.g[cgid].Winner === null && userlists.g[cgid].WinCause === null) {
+            userlists.g[cgid].Winner = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name;
+            userlists.g[cgid].WinCause = wincause;
 
-        userlists.eo[userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name].wins++;
+            userlists.eo[userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name].wins++;
+        }
 
         io.in(cgid).emit('gameEnded', userlists.g[cgid]);
     }

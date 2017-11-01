@@ -1,21 +1,92 @@
 import React, { Component } from 'react';
+
+import PropTypes from 'prop-types';
+import { DragSource, DropTarget } from 'react-dnd';
+import flow from 'lodash/flow';
+
 import request from 'sync-request';
+import { s_address } from './addresses.js';
 
 import { log, err } from './logerr.js';
 
 var CardArr = {};
 function getCardArr() {
-    const resCardArr = request('GET', 'http://localhost:3000/cards');
+    const resCardArr = request('GET', s_address + '/cards');
     CardArr = JSON.parse(resCardArr.body);
 }
 getCardArr();
 function getCard(type) {
-    const resCard = request('GET', 'http://localhost:3000/card/' + type);
+    const resCard = request('GET', s_address + '/card/' + type);
     var nCard;
     eval('nCard = ' + resCard.body);
     CardArr[type] = nCard;
 }
 // getCard('King');
+
+const Types = {
+    CARD: 'card'
+};
+
+const cardSource = {
+    beginDrag(props) {
+        log('beginDrag >>', props);
+        return props; // this is sent to target's .drop
+    },
+    endDrag(props, monitor, component) {
+        log('endDrag >>..', monitor.didDrop(), props, monitor, component);
+        if (!monitor.didDrop())
+            return;
+
+        const C1 = monitor.getItem(); // === props
+        const C2 = monitor.getDropResult(); // this comes from target's .drop
+        log('endDrag >>', C1, C2, props, monitor, component);
+
+        C1.movecard({
+            'c1': {
+                dt: C1.dt,
+                position: C1.position,
+                side: C1.ooe
+            },
+            'c2': {
+                dt: C2.dt,
+                position: C2.position,
+                side: C2.ooe
+            }
+        });
+    }
+};
+function collectSource(connect, monitor) {
+    // log('collectSource >>', connect, monitor);
+    return {
+        connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview(),
+        isDragging: monitor.isDragging()
+    };
+}
+
+const cardTarget = {
+    hover(props, monitor, component) {
+        // log('hover >>', props, monitor, component);
+    },
+    canDrop(props, monitor) {
+        // log('canDrop >>', props, monitor);
+        return true;
+    },
+    drop(props, monitor, component) {
+        const C1 = monitor.getItem(); // this comes from source's .beginDrag
+        log('drop >>', C1, props, monitor, component);
+
+        return props; // this is sent to source's .endDrag (getDropResult)
+    }
+};
+function collectTarget(connect, monitor) {
+    // log('collectTarget >>', connect, monitor);
+    return {
+        connectDropTarget: connect.dropTarget(),
+        highlighted: monitor.canDrop(),
+        hovered: monitor.isOver()
+    }
+}
 
 class CardFace extends Component {
     constructor(props) {
@@ -83,41 +154,45 @@ class CardCorner extends Component {
 }
 
 class Card extends Component {
-    render() {
-        const hoverable = this.props.hoverable || "false";
+    constructor(props) {
+        super(props);
+        this.state = {
+            fOb: this.props.fOb || "front",
+            hoverable: this.props.hoverable || "false"
+        };
+    }
 
-        const fOb = this.props.fOb;
-        const type = this.props.type;
+    render() {
+        const hoverable = this.state.hoverable || "false";
+        const fOb = this.state.fOb || "front";
+
+        const { connectDragSource, connectDropTarget, connectDragPreview, isDragging } = this.props;
+        // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
+
+        const type = this.props.type || "";
+        const position = this.props.position;
+        const dt = this.props.dt;
+        const ooe = this.props.ooe;
+
+        const dragable = this.props.dragable || "false";
+        const dropable = this.props.dropable || "false";
 
         // getCard(type);
 
-        var C = { // Type/Name of the card
-            "type": "", // Type/Name of the card
-
-            "x_px": 0, // 495px // How many frames on x-axis (*55px)
-            "y_px": 0, // 510px // How many frames on y-axis (*85px)
-            "frameNr": 0, // Total number of frames
-
-            "description": "", // Description of this card (will be shown on card-hover)
-
+        var C = {
+            "type": "",
+            "x_px": 0,
+            "y_px": 0,
+            "frameNr": 0,
+            "description": "",
             "cid": null,
-            "alreadyUsed": false, // if this card has already been played in "this" round
-            "roundsLeft": 0, // rounds left, until this card will be destroyed (-1 for infinite)
-
-            "MPS": 0, // required Mana-Points to summon this card
-            "HP": 0, // Health-Points
-
-            "AP": 0, // Attack-Points
-            "AT": "", // Attack-Type (Magical || Physical)
-
-            "effects":
-            // The effects (own and enemy) that are currently on this card,
-            // and their roundsLeft (gets applied after push to deck, so it can be pretty much everything)
-            // Effects can already be in here, which are called summon-effects
-            // They will be shown on card-hover
-            {
-                // Effecttype/-name: roundsLeft
-            }
+            "alreadyUsed": false,
+            "roundsLeft": 0,
+            "MPS": 0,
+            "HP": 0,
+            "AP": 0,
+            "AT": "",
+            "effects": {}
         };
         if (CardArr.hasOwnProperty(type))
             C = CardArr[type];
@@ -131,8 +206,12 @@ class Card extends Component {
         const AT = C.AT;
         const effects = C.effects;
 
-        return (
-            <div className="Card" fob={fOb} hoverable={hoverable}>
+        const CardMark =
+            <div className="Card" type={type} fob={fOb}
+                dt={dt} position={position} ooe={ooe}
+                hoverable={hoverable}
+                draggable={dragable} dropable={dropable}
+                isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
@@ -143,8 +222,40 @@ class Card extends Component {
                 </div>
                 <div className="CardBG" tabIndex="-1"></div>
             </div>
-        );
+
+        if (dragable === "true" && dropable === "true")
+            return connectDragSource(connectDropTarget(connectDragPreview(
+                CardMark, {
+                    captureDraggingState: true
+                }
+            )));
+        else if (dragable === "true" && dropable === "false")
+            return connectDragSource(connectDragPreview(
+                CardMark, {
+                    captureDraggingState: true
+                }
+            ));
+        else if (dragable === "false" && dropable === "true")
+            return connectDropTarget(
+                CardMark
+            );
+        else
+            return (
+                CardMark
+            );
     }
 }
 
-export default Card;
+Card.propTypes = {
+    connectDragSource: PropTypes.func.isRequired,
+    connectDropTarget: PropTypes.func.isRequired,
+    connectDragPreview: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool.isRequired
+}
+
+export default flow(
+    DragSource(Types.CARD, cardSource, collectSource),
+    DropTarget(Types.CARD, cardTarget, collectTarget)
+)(Card);
+// export default DragSource(Types.CARD, cardSource, collectSource)(Card);
+// export default Card;
