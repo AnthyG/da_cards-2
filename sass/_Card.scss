@@ -11,6 +11,20 @@
     font-size: 0.675rem;
     transition: all .1s cubic-bezier(0.075, 0.82, 0.165, 1);
     /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
+    & .CardInfo {
+        left: 100%;
+        // height: 100%;
+        display: none;
+        font-size: 5px;
+        padding: 0.25rem;
+        position: relative;
+        pointer-events: none;
+        background-color: rgba(66, 66, 66, 0.75);
+        & .CardEffects {
+            font-size: 0.85em;
+            margin-top: 0.25rem;
+        }
+    }
     &[hoverable="true"]:hover,
     &[hoverable="dynamic"]:not([type=""]):hover {
         z-index: 1;
@@ -18,6 +32,9 @@
         /* width: calc(5.5rem * 2);
         height: calc(8.5rem * 2); */
         transform-origin: bottom;
+        & .CardInfo {
+            display: block;
+        }
     }
     &[draggable="true"]:hover {
         cursor: pointer;
@@ -84,7 +101,10 @@
         }
     }
     &[fOb="back"] .CardFace,
+    &[fOb="back"] .CardInfo,
     &[fOb="back"] .CardCorner,
+    &[type=""] .CardFace,
+    &[type=""] .CardInfo,
     &[type=""] .CardCorner {
         display: none;
     }

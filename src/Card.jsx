@@ -23,6 +23,20 @@ function getCard(type) {
 }
 // getCard('King');
 
+var CardEffectsArr = {};
+function getCardEffectsArr() {
+    const resCardEffectsArr = request('GET', s_address + '/cardeffects');
+    CardEffectsArr = JSON.parse(resCardEffectsArr.body);
+}
+getCardEffectsArr();
+function getCardEffect(type) {
+    const resCardEffect = request('GET', s_address + '/cardeffect/' + type);
+    var nCardEffect;
+    eval('nCardEffect = ' + resCardEffect.body);
+    CardEffectsArr[type] = nCardEffect;
+}
+// getCardEffect('Motivate 1');
+
 const Types = {
     CARD: 'card'
 };
@@ -108,23 +122,23 @@ class CardFace extends Component {
     }
 
     tick() {
-        const Card = this.props.c;
+        const C = this.props.c;
         const curFrame = this.state.frame;
         this.setState({
-            frame: (curFrame + 1 < Card.frameNr ? curFrame + 1 : 0)
+            frame: (curFrame + 1 < C.frameNr ? curFrame + 1 : 0)
         });
     }
 
     render() {
-        const Card = this.props.c;
-        const type = Card.type;
+        const C = this.props.c;
+        const type = C.type;
         const curFrame = this.state.frame;
 
-        const cx = curFrame % Card.x_px;
-        const cxm = Card.x_px - cx - 1;
+        const cx = curFrame % C.x_px;
+        const cxm = C.x_px - cx - 1;
 
-        const cy = (curFrame - curFrame % Card.x_px) / Card.x_px;
-        const cym = Card.y_px - cy - 1;
+        const cy = (curFrame - curFrame % C.x_px) / C.x_px;
+        const cym = C.y_px - cy - 1;
 
         return (
             <div className="CardFace"
@@ -149,6 +163,58 @@ class CardCorner extends Component {
 
         return (
             <div className="CardCorner" posx={posX} posy={posY} ctype={ctype}><span>{value}</span></div>
+        );
+    }
+}
+
+class CardEffect extends Component {
+    render() {
+        const type = this.props.type;
+        const rl = this.props.rl;
+
+        const effect = CardEffectsArr[type];
+
+        return (
+            <div className="CardEffect">
+                <span className="EffectType">{type}</span><br />
+                <span className="EffectRL">{rl}/{effect.roundsLeft}</span><br />
+                <span className="EffectDescription">{effect.description}</span>
+            </div>
+        );
+    }
+}
+
+class CardEffects extends Component {
+    render() {
+        const effects = this.props.effects;
+
+        var effectslist = [];
+        for (var ex in effects) {
+            var ey = effects[ex];
+
+            effectslist.push(
+                <CardEffect type={ex} rl={ey} />
+            );
+        }
+
+        return (
+            <div className="CardEffects">
+                {effectslist}
+            </div>
+        );
+    }
+}
+
+class CardInfo extends Component {
+    render() {
+        const C = this.props.c;
+
+        return (
+            <div className="CardInfo">
+                <span>AT: {C.AT}</span><br />
+                <span>Description: {C.description}</span><br />
+                <CardEffects effects={C.effects} />
+            </div>
         );
     }
 }
@@ -215,6 +281,7 @@ class Card extends Component {
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
+                    <CardInfo c={C} />
                     <CardCorner ctype="AP" value={AP} />
                     <CardCorner ctype="HP" value={HP} posX="R" />
                     <CardCorner ctype="roundsLeft" value={roundsLeft} posY="B" />

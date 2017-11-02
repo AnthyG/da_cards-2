@@ -11,6 +11,42 @@ var log = function log(...m) {
     console.log('\n' + Date().toString() + ':\n', m);
 };
 
+var loginlist = [];
+
+function getLoginList(cb) {
+    loginlist = eval(fs.readFileSync(__dirname + '/PRIVATE/loginlist.js', 'UTF-8'));
+
+    typeof cb === 'function' && cb();
+}
+getLoginList();
+setInterval(getLoginList, 10000);
+
+var CardArr = [];
+
+function getCards(cb) {
+    const l1 = ('let CardArr = ').length;
+    const l2 = (';  export default CardArr;').length;
+    const rCardArr = fs.readFileSync(__dirname + '/CardArr.js', 'UTF-8');
+    eval('CardArr = ' + rCardArr.substr(l1, rCardArr.length - l2 - l1));
+
+    typeof cb === 'function' && cb();
+}
+getCards();
+setInterval(getCards, 10000);
+
+var CardEffectsArr = [];
+
+function getCardEffects(cb) {
+    const l1 = ('let CardEffectsArr = ').length;
+    const l2 = (';  export default CardEffectsArr;').length;
+    const rCardEffectsArr = fs.readFileSync(__dirname + '/CardEffectsArr.js', 'UTF-8');
+    eval('CardEffectsArr = ' + rCardEffectsArr.substr(l1, rCardEffectsArr.length - l2 - l1));
+
+    typeof cb === 'function' && cb();
+}
+getCardEffects();
+setInterval(getCardEffects, 10000);
+
 server.listen(port, function() {
     log('Server listening on port ' + port);
 });
@@ -31,37 +67,24 @@ app.get('/card/:type', function(req, res) {
     res.json(CardArr[type]);
 });
 
+app.get('/cardeffects', function(req, res) {
+    log('Serving all cardeffects');
+    res.json(CardEffectsArr);
+});
+app.get('/cardeffect/:type', function(req, res) {
+    const type = req.params.type;
+    log('Serving cardeffect ', type);
+    res.json(CardEffectsArr[type]);
+});
+
 var dir = __dirname + '/build/';
 app.use(express.static(dir));
 app.get(/^(.+)$/, function(req, res) {
     res.sendFile(dir + 'index.html');
 });
 
-var loginlist = [];
-
-function getLoginList(cb) {
-    loginlist = eval(fs.readFileSync(__dirname + '/PRIVATE/loginlist.js', 'UTF-8'));
-
-    typeof cb === 'function' && cb();
-}
-getLoginList();
-setInterval(getLoginList, 10000);
-
-var CardArr = [];
-
-function getCards(cb) {
-    const l1 = ('let CardArr = ').length;
-    const l2 = ('; export default CardArr;').length + 1;
-    const rCardArr = fs.readFileSync(__dirname + '/CardArr.js', 'UTF-8');
-    eval('CardArr = ' + rCardArr.substr(l1, rCardArr.length - l2 - l1));
-
-    typeof cb === 'function' && cb();
-}
-getCards();
-setInterval(getCards, 10000);
-
-// (min * 60secs)-1sec = secs
-var roundLengthNormal = (1 * 10) - 1; // 1min (60secs)
+// (min * 60secs)-1sec = secs (-1sec because it starts at 0, not 1, (just a shift -1sec))
+var roundLengthNormal = (1 * 30) - 1; // 1min (60secs)
 var roundLengthExtended = (60 * 60) - 1; // 60mins (3600secs)
 
 var numUsers = 0;
@@ -153,20 +176,20 @@ io.on('connection', function(socket) {
         if (cgid !== null) {
             var g = JSON.parse(JSON.stringify(userlists.g[cgid]));
             const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
+            const eIsNr = iAmNr === 0 ? 1 : 0;
 
             g.Players[iAmNr].deck.inBlock = Object.keys(g.Players[iAmNr].deck.inBlock).length;
-            g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.onHand).length;
-            g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock).length;
+            g.Players[eIsNr].deck.onHand = Object.keys(g.Players[eIsNr].deck.onHand).length;
+            g.Players[eIsNr].deck.inBlock = Object.keys(g.Players[eIsNr].deck.inBlock).length;
 
             socket.emit('game', g);
 
             if (sendToEnemy) {
                 var g2 = JSON.parse(JSON.stringify(userlists.g[cgid]));
-                const eIsNr = userlists.g[cgid].Players[0].User.name === socket.username ? 1 : 0;
 
                 g2.Players[eIsNr].deck.inBlock = Object.keys(g2.Players[eIsNr].deck.inBlock).length;
-                g2.Players[(eIsNr === 0 ? 1 : 0)].deck.onHand = Object.keys(g2.Players[(eIsNr === 0 ? 1 : 0)].deck.onHand).length;
-                g2.Players[(eIsNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g2.Players[(eIsNr === 0 ? 1 : 0)].deck.inBlock).length;
+                g2.Players[iAmNr].deck.onHand = Object.keys(g2.Players[iAmNr].deck.onHand).length;
+                g2.Players[iAmNr].deck.inBlock = Object.keys(g2.Players[iAmNr].deck.inBlock).length;
 
                 socket.broadcast.to(cgid).emit('game', g2);
             }

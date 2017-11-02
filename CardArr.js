@@ -33,6 +33,6 @@ let CardArr = {
             "Motivate 2": 0
         }
     }
-}
+};
 
-// export default CardArr;
+export default CardArr;

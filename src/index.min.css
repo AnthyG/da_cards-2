@@ -44,12 +44,25 @@ body {
   font-size: 0.675rem;
   transition: all 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
   /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */ }
+  .Card .CardInfo {
+    left: 100%;
+    display: none;
+    font-size: 5px;
+    padding: 0.25rem;
+    position: relative;
+    pointer-events: none;
+    background-color: rgba(66, 66, 66, 0.75); }
+    .Card .CardInfo .CardEffects {
+      font-size: 0.85em;
+      margin-top: 0.25rem; }
   .Card[hoverable="true"]:hover, .Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
     transform: scale(2);
     /* width: calc(5.5rem * 2);
         height: calc(8.5rem * 2); */
     transform-origin: bottom; }
+    .Card[hoverable="true"]:hover .CardInfo, .Card[hoverable="dynamic"]:not([type=""]):hover .CardInfo {
+      display: block; }
   .Card[draggable="true"]:hover {
     cursor: pointer; }
   .Card .CardFG {
@@ -103,7 +116,10 @@ body {
       bottom: 0;
       top: initial; }
   .Card[fOb="back"] .CardFace,
+  .Card[fOb="back"] .CardInfo,
   .Card[fOb="back"] .CardCorner,
+  .Card[type=""] .CardFace,
+  .Card[type=""] .CardInfo,
   .Card[type=""] .CardCorner {
     display: none; }
 
