@@ -7,6 +7,18 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || 3000; // In Windows 'set PORT=3000&&node index.js'; In Linux 'PORT=3000 node index.js'
 var fs = require('fs');
 
+/* MODIFIED FROM https://stackoverflow.com/a/1985471/5712160 */
+var arrRotate = function arrRotate(arr, count) {
+    var unshift = Array.prototype.unshift,
+        splice = Array.prototype.splice;
+
+    var len = arr.length >>> 0,
+        count = count >> 0;
+
+    unshift.apply(arr, splice.call(arr, count % len, len));
+    return arr;
+}
+
 var log = function log(...m) {
     console.log('\n' + Date().toString() + ':\n', m);
 };
@@ -272,9 +284,9 @@ io.on('connection', function(socket) {
                     },
                     'roundsOff': 0,
                     'deck': {
-                        'onHand': {},
-                        'onField': {},
-                        'inBlock': {}
+                        'onHand': [],
+                        'onField': [],
+                        'inBlock': []
                     },
                     'MP': 20,
                     'HP': 3
@@ -286,9 +298,9 @@ io.on('connection', function(socket) {
                     },
                     'roundsOff': 0,
                     'deck': {
-                        'onHand': {},
-                        'onField': {},
-                        'inBlock': {}
+                        'onHand': [],
+                        'onField': [],
+                        'inBlock': []
                     },
                     'MP': 20,
                     'HP': 3
@@ -311,7 +323,7 @@ io.on('connection', function(socket) {
             arr = [];
             var fncs;
             fncs = [];
-            var ARRAYTHINGIEd = {};
+            var ARRAYTHINGIEd = [];
 
             function gRC() {
                 return CardArr[Object.keys(CardArr)[Math.floor(Math.random() * Object.keys(CardArr).length)]]; // WORKS FOR OBJECT's
@@ -323,7 +335,7 @@ io.on('connection', function(socket) {
                     return function() {
                         if (emptyP !== true) {
                             arr[b] = gRC();
-                            arr[b].cid = "cid-" + (Math.floor((Math.random() * 900) + 100)).toString();
+                            arr[b].cid = "cid-" + (Math.floor((Math.random() * 90000) + 10000)).toString();
                             if (modeP === true) {
                                 arr[b].position = b;
                             }
@@ -400,8 +412,8 @@ io.on('connection', function(socket) {
             const lastPlayerNr = userlists.g[cgid].currentPlayer === userlists.g[cgid].Players[0].User.name ? 0 : 1;
             userlists.g[cgid].currentPlayer = userlists.g[cgid].Players[lastPlayerNr === 0 ? 1 : 0].User.name;
 
-            for (var px = 0; px < 2; px++) {
-                for (var cx in userlists.g[cgid].Players[px].deck.onField) {
+            for (let px = 0; px < 2; px++) {
+                for (let cx in userlists.g[cgid].Players[px].deck.onField) {
                     if (userlists.g[cgid].Players[px].deck.onField[cx] !== null) {
                         // Check if the card has an effect, which disables it's ability to be used,
                         // and set alreadyUsed accordingly
@@ -426,6 +438,9 @@ io.on('connection', function(socket) {
                     Object.keys(userlists.g[cgid].Players[px].deck.inBlock).length > 0) {
                     // Set MP back to 20
                     userlists.g[cgid].Players[px].MP = 20;
+
+                    // Rotate onField
+                    arrRotate(userlists.g[cgid].Players[px].deck.onField, 1);
 
                     const scard = JSON.parse(JSON.stringify(userlists.g[cgid].Players[px].deck.inBlock[Object.keys(userlists.g[cgid].Players[px].deck.inBlock)[0]]));
                     // Put card from inBlock into onHand
@@ -497,7 +512,7 @@ io.on('connection', function(socket) {
                         if (!userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].effects.hasOwnProperty('instant-use'))
                             userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].alreadyUsed = true;
 
-                        delete userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
+                        userlists.g[cgid].Players[iAmNr].deck[C1.dt].splice(C1.position, 1);
 
                         userlists.g[cgid].Players[iAmNr].MP -= CardArr[userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].type].MPS;
 
