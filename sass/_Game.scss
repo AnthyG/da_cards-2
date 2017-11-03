@@ -1,138 +1,152 @@
 .App-game {
     display: block;
-}
-
-.App-game-menu-toggle {
-    top: 0;
-    right: 0;
-    z-index: 2;
-    padding: 0.25rem;
-    position: absolute;
-}
-
-.App-game-info {
-    display: block;
-}
-
-.App-game-decks {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    display: block;
-    position: absolute;
-    &.show-menu-true {
-        display: none;
-    }
-    & .currentPlayer {
+    & .App-game-menu-toggle {
         top: 50%;
-        left: 50%;
-        z-index: 1;
+        left: 100%;
+        z-index: 2;
         padding: 0.5rem;
         position: absolute;
         border-radius: 0.25rem;
         background-color: #FFFFFF;
         border: 2px solid #000000;
-        transform: translate(-50%, -50%);
+        transform: translate(-100%, -50%);
     }
-    & .deck {
+    & .App-game-info {
+        margin-top: 0.5rem;
+        display: block;
+    }
+    &.show-menu-true {
+        .App-game-decks {
+            display: none;
+        } // & .App-game-info {
+        //     z-index: 2;
+        // }
+    }
+    & .App-game-decks {
         top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
         width: 100%;
-        height: 50%;
+        height: 100%;
         display: block;
         position: absolute;
-        background-color: #DDDDDD;
-        & .PlayerInfo {
-            bottom: 0;
+        & .currentPlayer {
+            top: 50%;
+            left: 50%;
             z-index: 1;
-            display: block;
+            padding: 0.5rem;
             position: absolute;
-            & .MP {
-                padding: 0.25rem;
-                border-radius: 50%;
-                background-color: lightblue;
-                border: 1px solid lightseagreen;
-            }
+            border-radius: 0.25rem;
+            background-color: #FFFFFF;
+            border: 2px solid #000000;
+            transform: translate(-50%, -50%);
         }
-        & .deck-onHand,
-        & .deck-onField,
-        & .deck-inBlock {
-            display: block;
-            position: absolute;
-            min-width: calc(5.5rem + 0.25rem * 2);
-            min-height: calc(8.5rem + 0.25rem * 2);
-            & .Card {
-                float: left;
-            }
-        }
-        & .deck-onHand {
+        & .deck {
             top: 0;
-            left: calc(2 * (5.5rem + 0.25rem * 2));
-            background-color: #00FF00;
-            & .Card {
-                width: calc(4rem);
-                & .CardFG,
-                & .CardBG {
-                    width: calc(5.5rem * 1);
+            width: 100%;
+            height: 50%;
+            display: block;
+            position: absolute;
+            background-color: #DDDDDD;
+            & .PlayerInfo {
+                bottom: 0;
+                z-index: 1;
+                display: block;
+                position: absolute;
+                & .MP,
+                & .HP {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                    padding: 0.175rem;
+                    border-radius: 50%;
+                }
+                & .MP {
+                    background-color: lightblue;
+                    border: 1px solid lightseagreen;
+                }
+                & .HP {
+                    background-color: lightpink;
+                    border: 1px solid lightcoral;
                 }
             }
-            // $maxcardsonhand: 15;
-            // @for $i from 0 through $maxcardsonhand {
-            //     & .Card:nth-child(#{$i}) {
-            //         right: calc(1rem * #{$i});
-            //     }
-            // }
-        }
-        & .deck-onField {
-            bottom: 1.25rem;
-            background-color: #FF0000;
-        }
-        & .deck-inBlock {
-            top: 0;
-            left: 0;
-            background-color: #0000FF;
-            width: calc(5.5rem + 0.25rem * 2);
-            height: calc(8.5rem + 0.25rem * 2);
-            & .deck-inBlock-nr {
-                top: 50%;
-                left: 50%;
-                z-index: 1;
+            & .deck-onHand,
+            & .deck-onField,
+            & .deck-inBlock {
+                display: block;
                 position: absolute;
-                transform: translate(-50%, -50%);
-            }
-            & .Card {
-                position: absolute;
-            }
-        }
-        &[ooe="own"] {
-            top: initial;
-            bottom: 0;
-            background-color: #AAAAAA;
-            & .PlayerInfo {
-                top: 0;
-                bottom: initial;
+                min-width: calc(5.5rem + 0.25rem * 2);
+                min-height: calc(8.5rem + 0.25rem * 2);
+                & .Card {
+                    float: left;
+                }
             }
             & .deck-onHand {
-                top: initial;
-                left: initial;
-                right: calc(2 * (5.5rem + 0.25rem * 2));
-                bottom: 0;
+                top: 0;
+                left: calc(2 * (5.5rem + 0.25rem * 2));
+                background-color: #00FF00;
+                & .Card {
+                    width: calc(4rem);
+                    & .CardFG,
+                    & .CardBG {
+                        width: calc(5.5rem * 1);
+                    }
+                } // $maxcardsonhand: 15;
+                // @for $i from 0 through $maxcardsonhand {
+                //     & .Card:nth-child(#{$i}) {
+                //         right: calc(1rem * #{$i});
+                //     }
+                // }
             }
             & .deck-onField {
-                top: 1.25rem;
-                bottom: initial;
-                & .Card {
-                    float: right;
-                }
+                bottom: 1.25rem;
+                background-color: #FF0000;
             }
             & .deck-inBlock {
+                top: 0;
+                left: 0;
+                background-color: #0000FF;
+                width: calc(5.5rem + 0.25rem * 2);
+                height: calc(8.5rem + 0.25rem * 2);
+                & .deck-inBlock-nr {
+                    top: 50%;
+                    left: 50%;
+                    z-index: 1;
+                    position: absolute;
+                    transform: translate(-50%, -50%);
+                }
+                & .Card {
+                    position: absolute;
+                }
+            }
+            &[ooe="own"] {
                 top: initial;
-                left: initial;
-                right: 0;
                 bottom: 0;
+                background-color: #AAAAAA;
+                & .PlayerInfo {
+                    top: 0;
+                    bottom: initial;
+                }
+                & .deck-onHand {
+                    top: initial;
+                    left: initial;
+                    right: calc(2 * (5.5rem + 0.25rem * 2));
+                    bottom: 0;
+                }
+                & .deck-onField {
+                    top: 1.25rem;
+                    bottom: initial;
+                    & .Card {
+                        float: right;
+                    }
+                }
+                & .deck-inBlock {
+                    top: initial;
+                    left: initial;
+                    right: 0;
+                    bottom: 0;
+                }
             }
         }
     }

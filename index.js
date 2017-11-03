@@ -175,27 +175,48 @@ io.on('connection', function(socket) {
 
         if (cgid !== null) {
             var g = JSON.parse(JSON.stringify(userlists.g[cgid]));
-            const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
-            const eIsNr = iAmNr === 0 ? 1 : 0;
+            const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : (userlists.g[cgid].Players[1].User.name === socket.username ? 1 : false);
+            const eIsNr = iAmNr === 0 ? 1 : (iAmNr === 1 ? 0 : false);
 
-            g.Players[iAmNr].deck.inBlock = Object.keys(g.Players[iAmNr].deck.inBlock).length;
-            g.Players[eIsNr].deck.onHand = Object.keys(g.Players[eIsNr].deck.onHand).length;
-            g.Players[eIsNr].deck.inBlock = Object.keys(g.Players[eIsNr].deck.inBlock).length;
+            const otherMeId = userlists.g[cgid].Players[iAmNr].User.id;
+            const enemyId = userlists.g[cgid].Players[eIsNr].User.id;
 
-            socket.emit('game', g);
+            // log('sendGame >>', socket.username, socket.id, otherMeId, enemyId, cgid, sendToEnemy, iAmNr, eIsNr);
+            // sendLog('sendGame >>', socket.username, socket.id, enemyId, cgid, sendToEnemy, iAmNr, eIsNr);
 
-            if (sendToEnemy) {
-                var g2 = JSON.parse(JSON.stringify(userlists.g[cgid]));
+            if (iAmNr === 0 || iAmNr === 1) {
+                g.Players[iAmNr].deck.inBlock = Object.keys(g.Players[iAmNr].deck.inBlock).length;
+                g.Players[eIsNr].deck.onHand = Object.keys(g.Players[eIsNr].deck.onHand).length;
+                g.Players[eIsNr].deck.inBlock = Object.keys(g.Players[eIsNr].deck.inBlock).length;
 
-                g2.Players[eIsNr].deck.inBlock = Object.keys(g2.Players[eIsNr].deck.inBlock).length;
-                g2.Players[iAmNr].deck.onHand = Object.keys(g2.Players[iAmNr].deck.onHand).length;
-                g2.Players[iAmNr].deck.inBlock = Object.keys(g2.Players[iAmNr].deck.inBlock).length;
+                if (socket.id !== otherMeId) {
+                    socket.broadcast.to(otherMeId).emit('game', g);
+                } else {
+                    socket.emit('game', g);
+                }
 
-                socket.broadcast.to(cgid).emit('game', g2);
+                if (sendToEnemy) {
+                    var g2 = JSON.parse(JSON.stringify(userlists.g[cgid]));
+
+                    g2.Players[eIsNr].deck.inBlock = Object.keys(g2.Players[eIsNr].deck.inBlock).length;
+                    g2.Players[iAmNr].deck.onHand = Object.keys(g2.Players[iAmNr].deck.onHand).length;
+                    g2.Players[iAmNr].deck.inBlock = Object.keys(g2.Players[iAmNr].deck.inBlock).length;
+
+                    socket.broadcast.to(enemyId).emit('game', g2);
+                }
+            } else {
+                g.Players[0].deck.onHand = Object.keys(g.Players[0].deck.onHand).length;
+                g.Players[0].deck.inBlock = Object.keys(g.Players[0].deck.inBlock).length;
+                g.Players[1].deck.onHand = Object.keys(g.Players[1].deck.onHand).length;
+                g.Players[1].deck.inBlock = Object.keys(g.Players[1].deck.inBlock).length;
+
+                socket.emit('game', g);
             }
         }
     }
-    socket.on('getGame', sendGame);
+    socket.on('getGame', function() {
+        sendGame();
+    });
 
     function sendUser(username) {
         var username = username || socket.username;
@@ -224,6 +245,11 @@ io.on('connection', function(socket) {
             if (userlists.g[gid].Winner !== null && userlists.g[gid].WinCause !== null) {
                 io.in(gid).emit('gameEnded', userlists.g[gid]);
             } else {
+                sendLog('rejoining >>', gid);
+                const iAmNr = userlists.g[gid].Players[0].User.name === socket.username ? 0 : 1;
+
+                userlists.g[gid].Players[iAmNr].User.id = socket.id;
+
                 socket.state = 'inGame';
                 sendState();
             }
@@ -250,7 +276,8 @@ io.on('connection', function(socket) {
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MP': 20
+                    'MP': 20,
+                    'HP': 3
                 },
                 1: {
                     'User': {
@@ -263,7 +290,8 @@ io.on('connection', function(socket) {
                         'onField': {},
                         'inBlock': {}
                     },
-                    'MP': 20
+                    'MP': 20,
+                    'HP': 3
                 }
             },
             'Creationdate': Date().toString(),
@@ -389,9 +417,6 @@ io.on('connection', function(socket) {
                     }
                 }
 
-                // Set MP back to 20
-                userlists.g[cgid].Players[px].MP = 20;
-
                 // Serve new card from block into hand,
                 // if lastPlayerNr is this px,
                 // if the maximum of 15 cards in onHand hasn't been reached yet,
@@ -399,6 +424,8 @@ io.on('connection', function(socket) {
                 if (lastPlayerNr !== px &&
                     Object.keys(userlists.g[cgid].Players[px].deck.onHand).length < 15 &&
                     Object.keys(userlists.g[cgid].Players[px].deck.inBlock).length > 0) {
+                    // Set MP back to 20
+                    userlists.g[cgid].Players[px].MP = 20;
 
                     const scard = JSON.parse(JSON.stringify(userlists.g[cgid].Players[px].deck.inBlock[Object.keys(userlists.g[cgid].Players[px].deck.inBlock)[0]]));
                     // Put card from inBlock into onHand

@@ -127,6 +127,7 @@ class PlayerInfo extends Component {
             <div className="PlayerInfo" ooe={ooe}>
                 <span className="PlayerName">{P.User.name}</span>&nbsp;
                 <span className="MP">{P.MP}</span>&nbsp;
+                <span className="HP">{P.HP}</span>&nbsp;
                 {P.roundsOff > 0 &&
                     <span className="roundsOff">{P.roundsOff}&nbsp;</span>
                 }
@@ -222,7 +223,7 @@ class Game extends Component {
 
         const iAmNr = g.Players[0].User.name === username ? 0 : 1;
         return (
-            <div className="App-game">
+            <div className={"App-game show-menu-" + this.state.show_menu}>
                 <a href="#Menu-toggle" className="App-game-menu-toggle" onClick={(e) => this.handleShowMenuToggle(e)}>Menu</a>
 
                 <div className="App-game-info">
@@ -235,7 +236,7 @@ class Game extends Component {
                     <span className="WinCause">WinCause: {g.WinCause}</span>
                 </div>
 
-                <div className={"App-game-decks show-menu-" + this.state.show_menu}>
+                <div className="App-game-decks">
                     {username === g.currentPlayer ?
                         <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>Finish turn</a> :
                         <a className="currentPlayer">Enemies turn</a>
