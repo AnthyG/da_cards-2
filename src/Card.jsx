@@ -236,16 +236,6 @@ class Card extends Component {
         const { connectDragSource, connectDropTarget, connectDragPreview, isDragging } = this.props;
         // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
 
-        const type = this.props.type || "";
-        const position = this.props.position;
-        const dt = this.props.dt;
-        const ooe = this.props.ooe;
-
-        const dragable = this.props.dragable || "false";
-        const dropable = this.props.dropable || "false";
-
-        // getCard(type);
-
         var C = {
             "type": "",
             "x_px": 0,
@@ -261,17 +251,28 @@ class Card extends Component {
             "AT": "",
             "effects": {}
         };
+        const type = this.props.type;
         if (CardArr.hasOwnProperty(type))
             C = CardArr[type];
 
+        const rC = this.props.rc || JSON.parse(JSON.stringify(C));
+        const position = this.props.position;
+        const dt = this.props.dt;
+        const ooe = this.props.ooe;
+
+        const dragable = this.props.dragable || "false";
+        const dropable = this.props.dropable || "false";
+
+        // getCard(type);
+
         const description = C.description;
-        const alreadyUsed = C.alreadyUsed;
-        const roundsLeft = C.roundsLeft;
+        const alreadyUsed = rC.alreadyUsed;
+        const roundsLeft = rC.roundsLeft;
         const MPS = C.MPS;
-        const HP = C.HP;
+        const HP = rC.HP;
         const AP = C.AP;
         const AT = C.AT;
-        const effects = C.effects;
+        const effects = rC.effects;
 
         const CardMark =
             <div className="Card" type={type} fob={fOb}

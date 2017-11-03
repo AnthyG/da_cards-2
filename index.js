@@ -299,11 +299,17 @@ io.on('connection', function(socket) {
                             if (modeP === true) {
                                 arr[b].position = b;
                             }
-                            return JSON.stringify(arr[b]);
+                            delete arr[b].x_px;
+                            delete arr[b].y_px;
+                            delete arr[b].frameNr;
+                            delete arr[b].description;
+                            delete arr[b].MPS;
+                            delete arr[b].AP;
+                            delete arr[b].AT;
                         } else if (emptyP === true) {
                             arr[b] = null;
-                            return JSON.stringify(arr[b]);
                         }
+                        return JSON.stringify(arr[b]);
                     }
                 };
                 ARRAYTHINGIEd[a] = (JSON.parse(fncs[a](a, mode, empty)()));
@@ -450,7 +456,7 @@ io.on('connection', function(socket) {
                 // Check if the player has enough MP to summon the card,
                 // if that field is available for summon's,
                 // and if there already is a card on that field
-                if (userlists.g[cgid].Players[iAmNr].MP >= userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].MPS) {
+                if (userlists.g[cgid].Players[iAmNr].MP >= CardArr[userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].type].MPS) {
                     // Check, if the card is even able to get summoned on this field
 
                     if (userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position]) { // If there is a card..
@@ -466,7 +472,7 @@ io.on('connection', function(socket) {
 
                         delete userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position];
 
-                        userlists.g[cgid].Players[iAmNr].MP -= userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].MPS;
+                        userlists.g[cgid].Players[iAmNr].MP -= CardArr[userlists.g[cgid].Players[iAmNr].deck[C2.dt][C2.position].type].MPS;
 
                         sendToEnemy = true;
                     }
@@ -484,8 +490,8 @@ io.on('connection', function(socket) {
 
                     var c1_HP = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].HP;
                     var c2_HP = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].HP;
-                    var c1_AP = userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].AP;
-                    var c2_AP = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].AP;
+                    var c1_AP = CardArr[userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].type].AP;
+                    var c2_AP = CardArr[userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].type].AP;
 
                     for (var attacks = 0; attacks < c1_AP; attacks++) {
                         if (c2_HP > 0) {

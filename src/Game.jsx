@@ -27,7 +27,9 @@ class RenderCardArr extends Component {
                 let y = arr[x];
                 if (y !== null)
                     rArr.push(
-                        <Card fOb="front" type={y.type} dt={dt} position={x} ooe={ooe}
+                        <Card fOb="front"
+                            ooe={ooe} dt={dt} position={x}
+                            rc={y} type={y.type}
                             hoverable={hoverable}
                             dragable={dragable} dropable={dropable}
                             key={ooe + '-' + dt + '-' + y.cid}
@@ -35,7 +37,9 @@ class RenderCardArr extends Component {
                     );
                 else
                     rArr.push(
-                        <Card fOb="front" type="" dt={dt} position={x} ooe={ooe}
+                        <Card fOb="front"
+                            ooe={ooe} dt={dt} position={x}
+                            type=""
                             hoverable={hoverable}
                             dragable="false" dropable={dropable}
                             key={ooe + '-' + dt + '-' + x}
@@ -45,7 +49,9 @@ class RenderCardArr extends Component {
         } else {
             for (let x = 0; x < arr; x++) {
                 rArr.push(
-                    <Card fOb="back" type="" dt={dt} position={x} ooe={ooe}
+                    <Card fOb="back"
+                        ooe={ooe} dt={dt} position={x}
+                        type=""
                         hoverable={hoverable}
                         dragable="false" dropable="false"
                         key={ooe + '-' + dt + '-' + x}
