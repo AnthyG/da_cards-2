@@ -10,14 +10,19 @@
     font-weight: 100;
     font-size: 0.675rem;
     pointer-events: auto;
-    transform-origin: bottom;
-    // perspective: 1000px;
+    transform-origin: bottom; // perspective: 1000px;
     // transform-style: preserve-3d;
     transform: scale(1) translateY(0);
-    transition: all .1s ease-in-out;
+    transition: all .05s ease-in-out;
     /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */
+    &,
+    & *,
+    &:focus,
+    & *:focus {
+        outline: none;
+    }
     & .CardInfo {
-        left: 100%; // height: 100%;
+        left: calc(100% + 0.25rem); // height: 100%;
         display: none;
         color: #EEEEEE;
         font-size: 5px;
@@ -25,6 +30,7 @@
         position: relative;
         pointer-events: none;
         border-radius: 0.125rem;
+        box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.25);
         background-color: rgba(66, 66, 66, 0.75);
         border: 1px solid rgba(166, 166, 166, 0.75);
         & .CardEffects {
@@ -39,6 +45,10 @@
         height: calc(8.5rem * 2); */
         // pointer-events: none;
         transform: scale(1.75) translateY(-0.25rem);
+        & .CardFG,
+        & .CardBG {
+            box-shadow: 0px 2px 5px 2px rgba(0, 0, 0, 0.25);
+        }
         & .CardInfo {
             display: block;
         }
@@ -62,7 +72,6 @@
         transition: all .5s cubic-bezier(0.075, 0.82, 0.165, 1);
     }
     &[fOb="back"] {
-        /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 6px 8px; */
         & .CardFG {
             transform: rotateY(180deg);
         }

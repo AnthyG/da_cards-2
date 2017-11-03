@@ -45,10 +45,14 @@ body {
   pointer-events: auto;
   transform-origin: bottom;
   transform: scale(1) translateY(0);
-  transition: all .1s ease-in-out;
+  transition: all .05s ease-in-out;
   /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */ }
+  .Card,
+  .Card *, .Card:focus,
+  .Card *:focus {
+    outline: none; }
   .Card .CardInfo {
-    left: 100%;
+    left: calc(100% + 0.25rem);
     display: none;
     color: #EEEEEE;
     font-size: 5px;
@@ -56,6 +60,7 @@ body {
     position: relative;
     pointer-events: none;
     border-radius: 0.125rem;
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.25);
     background-color: rgba(66, 66, 66, 0.75);
     border: 1px solid rgba(166, 166, 166, 0.75); }
     .Card .CardInfo .CardEffects {
@@ -66,6 +71,10 @@ body {
     /* width: calc(5.5rem * 2);
         height: calc(8.5rem * 2); */
     transform: scale(1.75) translateY(-0.25rem); }
+    .Card[hoverable="true"]:hover .CardFG,
+    .Card[hoverable="true"]:hover .CardBG, .Card[hoverable="dynamic"]:not([type=""]):hover .CardFG,
+    .Card[hoverable="dynamic"]:not([type=""]):hover .CardBG {
+      box-shadow: 0px 2px 5px 2px rgba(0, 0, 0, 0.25); }
     .Card[hoverable="true"]:hover .CardInfo, .Card[hoverable="dynamic"]:not([type=""]):hover .CardInfo {
       display: block; }
     .Card[hoverable="true"]:hover .CardCorner, .Card[hoverable="dynamic"]:not([type=""]):hover .CardCorner {
@@ -81,12 +90,10 @@ body {
   .Card .CardFG,
   .Card .CardBG {
     transition: all 0.5s cubic-bezier(0.075, 0.82, 0.165, 1); }
-  .Card[fOb="back"] {
-    /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 6px 8px; */ }
-    .Card[fOb="back"] .CardFG {
-      transform: rotateY(180deg); }
-    .Card[fOb="back"] .CardBG {
-      transform: rotateY(360deg); }
+  .Card[fOb="back"] .CardFG {
+    transform: rotateY(180deg); }
+  .Card[fOb="back"] .CardBG {
+    transform: rotateY(360deg); }
   .Card .CardFG,
   .Card .CardBG,
   .Card .CardFace {
@@ -166,6 +173,7 @@ body {
     width: 100%;
     height: 100%;
     display: block;
+    overflow: hidden;
     position: absolute; }
     .App-game .App-game-decks .currentPlayer {
       top: 50%;
@@ -214,8 +222,10 @@ body {
           float: left; }
       .App-game .App-game-decks .deck .deck-onHand {
         top: 0;
-        left: calc(2 * (5.5rem + 0.25rem * 2));
-        background-color: #00FF00; }
+        transform: scale(0.5);
+        transform-origin: top;
+        background-color: #00FF00;
+        max-width: calc(100% - 5.5rem - 0.25rem * 2); }
         .App-game .App-game-decks .deck .deck-onHand .Card {
           width: calc(4rem); }
           .App-game .App-game-decks .deck .deck-onHand .Card .CardFG,
@@ -223,7 +233,10 @@ body {
             width: calc(5.5rem * 1); }
       .App-game .App-game-decks .deck .deck-onField {
         bottom: 1.25rem;
+        padding: 0 8.5rem;
         background-color: #FF0000; }
+        .App-game .App-game-decks .deck .deck-onField .Card {
+          float: right; }
       .App-game .App-game-decks .deck .deck-inBlock {
         top: 0;
         left: 0;
@@ -239,27 +252,32 @@ body {
         .App-game .App-game-decks .deck .deck-inBlock .Card {
           position: absolute; }
       .App-game .App-game-decks .deck[ooe="own"] {
-        top: initial;
         bottom: 0;
+        top: initial;
         background-color: #AAAAAA; }
         .App-game .App-game-decks .deck[ooe="own"] .PlayerInfo {
           top: 0;
           bottom: initial; }
         .App-game .App-game-decks .deck[ooe="own"] .deck-onHand {
+          bottom: 0;
+          z-index: 1;
           top: initial;
           left: initial;
-          right: calc(2 * (5.5rem + 0.25rem * 2));
-          bottom: 0; }
+          transform-origin: bottom;
+          transform: scale(0.5) translateY(0%);
+          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+          .App-game .App-game-decks .deck[ooe="own"] .deck-onHand:hover {
+            transform: scale(0.75) translateY(0%); }
         .App-game .App-game-decks .deck[ooe="own"] .deck-onField {
           top: 1.25rem;
           bottom: initial; }
           .App-game .App-game-decks .deck[ooe="own"] .deck-onField .Card {
-            float: right; }
+            float: left; }
         .App-game .App-game-decks .deck[ooe="own"] .deck-inBlock {
-          top: initial;
-          left: initial;
           right: 0;
-          bottom: 0; }
+          bottom: 0;
+          top: initial;
+          left: initial; }
  
 
  /*# sourceMappingURL= index.min.css.map */

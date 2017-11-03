@@ -31,6 +31,7 @@
         width: 100%;
         height: 100%;
         display: block;
+        overflow: hidden;
         position: absolute;
         & .currentPlayer {
             top: 50%;
@@ -84,8 +85,11 @@
             }
             & .deck-onHand {
                 top: 0;
-                left: calc(2 * (5.5rem + 0.25rem * 2));
+                transform: scale(0.5);
+                transform-origin: top;
                 background-color: #00FF00;
+                max-width: calc(100% - 5.5rem - 0.25rem * 2);
+                // left: calc(2 * (5.5rem + 0.25rem * 2));
                 & .Card {
                     width: calc(4rem);
                     & .CardFG,
@@ -101,7 +105,11 @@
             }
             & .deck-onField {
                 bottom: 1.25rem;
+                padding: 0 8.5rem;
                 background-color: #FF0000;
+                & .Card {
+                    float: right;
+                }
             }
             & .deck-inBlock {
                 top: 0;
@@ -121,31 +129,37 @@
                 }
             }
             &[ooe="own"] {
-                top: initial;
                 bottom: 0;
+                top: initial;
                 background-color: #AAAAAA;
                 & .PlayerInfo {
                     top: 0;
                     bottom: initial;
                 }
                 & .deck-onHand {
+                    bottom: 0;
+                    z-index: 1;
                     top: initial;
                     left: initial;
-                    right: calc(2 * (5.5rem + 0.25rem * 2));
-                    bottom: 0;
+                    transform-origin: bottom;
+                    transform: scale(0.5) translateY(0%); // translateY(75%)
+                    transition: all .3s cubic-bezier(0.25, 0.46, 0.45, 0.94); // right: calc(2 * (5.5rem + 0.25rem * 2));
+                    &:hover {
+                        transform: scale(0.75) translateY(0%);
+                    }
                 }
                 & .deck-onField {
                     top: 1.25rem;
                     bottom: initial;
                     & .Card {
-                        float: right;
+                        float: left;
                     }
                 }
                 & .deck-inBlock {
-                    top: initial;
-                    left: initial;
                     right: 0;
                     bottom: 0;
+                    top: initial;
+                    left: initial;
                 }
             }
         }
