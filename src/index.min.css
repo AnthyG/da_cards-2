@@ -42,25 +42,30 @@ body {
   font-style: normal;
   font-weight: 100;
   font-size: 0.675rem;
-  transition: all 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
+  pointer-events: auto;
+  transform-origin: bottom;
+  transform: scale(1) translateY(0);
+  transition: all .1s ease-in-out;
   /* box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 2px; */ }
   .Card .CardInfo {
     left: 100%;
     display: none;
+    color: #BBBBBB;
     font-size: 5px;
     padding: 0.25rem;
     position: relative;
     pointer-events: none;
-    background-color: rgba(66, 66, 66, 0.75); }
+    border-radius: 0.125rem;
+    background-color: rgba(66, 66, 66, 0.75);
+    border: 1px solid rgba(166, 166, 166, 0.75); }
     .Card .CardInfo .CardEffects {
       font-size: 0.85em;
       margin-top: 0.25rem; }
   .Card[hoverable="true"]:hover, .Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
-    transform: scale(2);
     /* width: calc(5.5rem * 2);
         height: calc(8.5rem * 2); */
-    transform-origin: bottom; }
+    transform: scale(1.75) translateY(-0.25rem); }
     .Card[hoverable="true"]:hover .CardInfo, .Card[hoverable="dynamic"]:not([type=""]):hover .CardInfo {
       display: block; }
   .Card[draggable="true"]:hover {
@@ -175,8 +180,6 @@ body {
         border-radius: 50%;
         background-color: lightblue;
         border: 1px solid lightseagreen; }
-    .App-game-decks .deck .Card {
-      float: left; }
     .App-game-decks .deck .deck-onHand,
     .App-game-decks .deck .deck-onField,
     .App-game-decks .deck .deck-inBlock {
@@ -184,10 +187,19 @@ body {
       position: absolute;
       min-width: calc(5.5rem + 0.25rem * 2);
       min-height: calc(8.5rem + 0.25rem * 2); }
+      .App-game-decks .deck .deck-onHand .Card,
+      .App-game-decks .deck .deck-onField .Card,
+      .App-game-decks .deck .deck-inBlock .Card {
+        float: left; }
     .App-game-decks .deck .deck-onHand {
       top: 0;
       left: calc(2 * (5.5rem + 0.25rem * 2));
       background-color: #00FF00; }
+      .App-game-decks .deck .deck-onHand .Card {
+        width: calc(4rem); }
+        .App-game-decks .deck .deck-onHand .Card .CardFG,
+        .App-game-decks .deck .deck-onHand .Card .CardBG {
+          width: calc(5.5rem * 1); }
     .App-game-decks .deck .deck-onField {
       bottom: 1.25rem;
       background-color: #FF0000; }

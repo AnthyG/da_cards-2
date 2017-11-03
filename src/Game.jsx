@@ -30,7 +30,7 @@ class RenderCardArr extends Component {
                         <Card fOb="front" type={y.type} dt={dt} position={x} ooe={ooe}
                             hoverable={hoverable}
                             dragable={dragable} dropable={dropable}
-                            key={ooe + '-' + dt + '-' + x}
+                            key={ooe + '-' + dt + '-' + y.cid}
                             movecard={this.props.movecard} />
                     );
                 else
@@ -120,7 +120,10 @@ class PlayerInfo extends Component {
         return (
             <div className="PlayerInfo" ooe={ooe}>
                 <span className="PlayerName">{P.User.name}</span>&nbsp;
-                <span className="MP">{P.MP}</span>
+                <span className="MP">{P.MP}</span>&nbsp;
+                {P.roundsOff > 0 &&
+                    <span className="roundsOff">{P.roundsOff}&nbsp;</span>
+                }
             </div>
         );
     }
@@ -228,8 +231,8 @@ class Game extends Component {
 
                 <div className={"App-game-decks show-menu-" + this.state.show_menu}>
                     {username === g.currentPlayer ?
-                        <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>{g.currentPlayer}</a> :
-                        <a className="currentPlayer">{g.currentPlayer}</a>
+                        <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>Finish turn</a> :
+                        <a className="currentPlayer">Enemies turn</a>
                     }
 
                     <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />

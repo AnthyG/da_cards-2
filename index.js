@@ -220,6 +220,13 @@ io.on('connection', function(socket) {
             socket.state = 'waiting';
             sendState();
             socket.broadcast.to(gid).emit('playerJoined', mydata);
+        } else if (userlists.g.hasOwnProperty(gid)) {
+            if (userlists.g[gid].Winner !== null && userlists.g[gid].WinCause !== null) {
+                io.in(gid).emit('gameEnded', userlists.g[gid]);
+            } else {
+                socket.state = 'inGame';
+                sendState();
+            }
         }
     }
 

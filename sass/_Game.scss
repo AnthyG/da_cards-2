@@ -57,9 +57,6 @@
                 border: 1px solid lightseagreen;
             }
         }
-        & .Card {
-            float: left;
-        }
         & .deck-onHand,
         & .deck-onField,
         & .deck-inBlock {
@@ -67,11 +64,27 @@
             position: absolute;
             min-width: calc(5.5rem + 0.25rem * 2);
             min-height: calc(8.5rem + 0.25rem * 2);
+            & .Card {
+                float: left;
+            }
         }
         & .deck-onHand {
             top: 0;
             left: calc(2 * (5.5rem + 0.25rem * 2));
             background-color: #00FF00;
+            & .Card {
+                width: calc(4rem);
+                & .CardFG,
+                & .CardBG {
+                    width: calc(5.5rem * 1);
+                }
+            }
+            // $maxcardsonhand: 15;
+            // @for $i from 0 through $maxcardsonhand {
+            //     & .Card:nth-child(#{$i}) {
+            //         right: calc(1rem * #{$i});
+            //     }
+            // }
         }
         & .deck-onField {
             bottom: 1.25rem;

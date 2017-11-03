@@ -193,7 +193,8 @@ class CardEffects extends Component {
             var ey = effects[ex];
 
             effectslist.push(
-                <CardEffect type={ex} rl={ey} />
+                <CardEffect type={ex} rl={ey}
+                key={ex + '-' + ey} />
             );
         }
 
