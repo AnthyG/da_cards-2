@@ -50,7 +50,7 @@ body {
   .Card .CardInfo {
     left: 100%;
     display: none;
-    color: #BBBBBB;
+    color: #EEEEEE;
     font-size: 5px;
     padding: 0.25rem;
     position: relative;
@@ -68,6 +68,8 @@ body {
     transform: scale(1.75) translateY(-0.25rem); }
     .Card[hoverable="true"]:hover .CardInfo, .Card[hoverable="dynamic"]:not([type=""]):hover .CardInfo {
       display: block; }
+    .Card[hoverable="true"]:hover .CardCorner, .Card[hoverable="dynamic"]:not([type=""]):hover .CardCorner {
+      text-shadow: 0px 2.5px 5px rgba(0, 0, 0, 0.75); }
   .Card[draggable="true"]:hover {
     cursor: pointer; }
   .Card .CardFG {
@@ -113,13 +115,23 @@ body {
   .Card .CardCorner {
     top: 0;
     left: 0;
-    position: absolute; }
+    padding: 0.175rem;
+    position: absolute;
+    text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.175); }
     .Card .CardCorner[posX="R"] {
       right: 0;
       left: initial; }
     .Card .CardCorner[posY="B"] {
       bottom: 0;
       top: initial; }
+    .Card .CardCorner[ctype="AP"] {
+      color: #CCD1D9; }
+    .Card .CardCorner[ctype="HP"] {
+      color: #D8334A; }
+    .Card .CardCorner[ctype="roundsLeft"] {
+      color: #000000; }
+    .Card .CardCorner[ctype="MPS"] {
+      color: #37BC9B; }
   .Card[fOb="back"] .CardFace,
   .Card[fOb="back"] .CardInfo,
   .Card[fOb="back"] .CardCorner,
