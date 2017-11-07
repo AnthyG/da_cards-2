@@ -174,6 +174,15 @@ class Game extends Component {
                 g: g
             });
         });
+
+        socket.on('gameEnded', function (g) {
+            log('gameEnded >>', g);
+            socket.emit('gameEnded');
+            dis.setState({
+                g: g
+            });
+        });
+
         socket.emit('getGame');
     }
 
@@ -216,17 +225,30 @@ class Game extends Component {
 
     render() {
         const username = this.props.username;
+        const state = this.props.state;
+
         const g = this.state.g;
         log('g2 >>', g);
         if (!g.hasOwnProperty('gid'))
-            return null;
+            return (
+                <div>
+                    <h2>Invalid GID!</h2>
+                </div>
+            )
 
-        const iAmNr = g.Players[0].User.name === username ? 0 : 1;
+        const iAmNr = g.Players[0].User.name === username ? 0 : (g.Players[1].User.name === username ? 1 : 0);
         return (
             <div className={"App-game show-menu-" + this.state.show_menu}>
                 <a href="#Menu-toggle" className="App-game-menu-toggle" onClick={(e) => this.handleShowMenuToggle(e)}>Menu</a>
 
                 <div className="App-game-info">
+                    {state === 'results' &&
+                        <div className="App-game-results">
+                            <h2>Game over!</h2>
+                            <h1>{g.Winner === username ? 'Victory!' : 'Defeat..'}</h1>
+                        </div>
+                    }
+
                     <span className="Creationdate">Creationdate: {g.Creationdate}</span><br />
                     <span className="roundLength">roundLength: {g.roundLength}</span><br />
                     <span className="timeRunning">timeRunning: {g.timeRunning}</span><br />
@@ -236,15 +258,17 @@ class Game extends Component {
                     <span className="WinCause">WinCause: {g.WinCause}</span>
                 </div>
 
-                <div className="App-game-decks">
-                    {username === g.currentPlayer ?
-                        <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>Finish turn</a> :
-                        <a className="currentPlayer">Enemies turn</a>
-                    }
+                {state === 'inGame' &&
+                    <div className="App-game-decks">
+                        {username === g.currentPlayer ?
+                            <a href="#nextRound" className="currentPlayer" onClick={(e) => this.nextRound(e)}>Finish turn</a> :
+                            <a className="currentPlayer">Enemies turn</a>
+                        }
 
-                    <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
-                    <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />
-                </div>
+                        <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
+                        <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />
+                    </div>
+                }
             </div>
         );
     }

@@ -155,7 +155,7 @@ class MainScreen extends Component {
                 <br />
                 <input type="text" value={getUsername} onChange={this.handleGetUsernameChange} />&nbsp;
                 <a href="#getUser" onClick={(e) => this.getUser(e, getUsername)}>get user</a>
-                {state === 'inGame' && <Game username={username} />}
+                {(state === 'inGame' || state === 'results') && <Game state={state} username={username} />}
             </div>
         );
     }
@@ -204,10 +204,6 @@ class App extends Component {
         socket.on('gameStarted', function (game) {
             log('gameStarted >>', game);
             socket.emit('gameStarted');
-        });
-        socket.on('gameEnded', function (game) {
-            log('gameEnded >>', game);
-            socket.emit('gameEnded');
         });
 
         // setInterval(function () {

@@ -11,29 +11,45 @@ import { log, err } from './logerr.js';
 
 var CardArr = {};
 function getCardArr() {
-    const resCardArr = request('GET', s_address + '/cards');
-    CardArr = JSON.parse(resCardArr.body);
+    try {
+        const resCardArr = request('GET', s_address + '/cards');
+        CardArr = JSON.parse(resCardArr.body);
+    } catch (error) {
+        err(error);
+    }
 }
 getCardArr();
 function getCard(type) {
-    const resCard = request('GET', s_address + '/card/' + type);
-    var nCard;
-    eval('nCard = ' + resCard.body);
-    CardArr[type] = nCard;
+    try {
+        const resCard = request('GET', s_address + '/card/' + type);
+        var nCard;
+        eval('nCard = ' + resCard.body);
+        CardArr[type] = nCard;
+    } catch (error) {
+        err(error);
+    }
 }
 // getCard('King');
 
 var CardEffectsArr = {};
 function getCardEffectsArr() {
-    const resCardEffectsArr = request('GET', s_address + '/cardeffects');
-    CardEffectsArr = JSON.parse(resCardEffectsArr.body);
+    try {
+        const resCardEffectsArr = request('GET', s_address + '/cardeffects');
+        CardEffectsArr = JSON.parse(resCardEffectsArr.body);
+    } catch (error) {
+        err(error);
+    }
 }
 getCardEffectsArr();
 function getCardEffect(type) {
-    const resCardEffect = request('GET', s_address + '/cardeffect/' + type);
-    var nCardEffect;
-    eval('nCardEffect = ' + resCardEffect.body);
-    CardEffectsArr[type] = nCardEffect;
+    try {
+        const resCardEffect = request('GET', s_address + '/cardeffect/' + type);
+        var nCardEffect;
+        eval('nCardEffect = ' + resCardEffect.body);
+        CardEffectsArr[type] = nCardEffect;
+    } catch (error) {
+        err(error);
+    }
 }
 // getCardEffect('Motivate 1');
 
@@ -194,7 +210,7 @@ class CardEffects extends Component {
 
             effectslist.push(
                 <CardEffect type={ex} rl={ey}
-                key={ex + '-' + ey} />
+                    key={ex + '-' + ey} />
             );
         }
 

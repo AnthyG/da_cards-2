@@ -161,14 +161,20 @@ io.on('connection', function(socket) {
     var addedUser = false;
 
     function sendErr(...m) {
+        if (!addedUser) return;
+
         socket.emit('err', m);
     }
 
     function sendLog(...m) {
+        if (!addedUser) return;
+
         socket.emit('log', m);
     }
 
     function sendUserlist(ul) {
+        if (!addedUser) return;
+
         // **THIS IS ONLY FOR DEVELOPMENT!!!*
         // THIS SHOULD BE SOMEWHAT FILTERING THE OUTPUT
         // FOR EXAMPLE, .g SHOULDN'T CONTAIN ANY OTHER USER's .onHand
@@ -182,6 +188,8 @@ io.on('connection', function(socket) {
     socket.on('getUserlist', sendUserlist);
 
     function sendGame(alsoToEnemy, gid) {
+        if (!addedUser || !isInGame()) return;
+
         const sendToEnemy = alsoToEnemy || false;
         const cgid = gid || userlists.eo[socket.username].gid;
 
@@ -231,17 +239,23 @@ io.on('connection', function(socket) {
     });
 
     function sendUser(username) {
+        if (!addedUser) return;
+
         var username = username || socket.username;
         socket.emit('user', username, userlists.eo[username]);
     }
     socket.on('getUser', sendUser);
 
     function sendState() {
+        if (!addedUser) return;
+
         socket.emit('state', socket.state);
     }
     socket.on('getState', sendState);
 
     function joinGID(gid) {
+        if (!addedUser) return;
+
         userlists.eo[socket.username].gid = gid;
         socket.join(gid);
 
@@ -269,6 +283,8 @@ io.on('connection', function(socket) {
     }
 
     function startGame(odata) {
+        if (!addedUser) return;
+
         const cgid = userlists.eo[socket.username].gid;
         const players = [socket.username, odata.username];
 
@@ -377,12 +393,16 @@ io.on('connection', function(socket) {
     socket.on('startGame', startGame);
 
     function gameStarted() {
+        if (!addedUser) return;
+
         socket.state = 'inGame';
         sendState();
     }
     socket.on('gameStarted', gameStarted);
 
     function gameLoop() {
+        if (!addedUser || !isInGame()) return;
+
         const cgid = userlists.eo[socket.username].gid;
         if (cgid !== null) {
             const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
@@ -402,6 +422,8 @@ io.on('connection', function(socket) {
     }
 
     function nextRound() {
+        if (!addedUser || !isInGame()) return;
+
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
@@ -463,6 +485,8 @@ io.on('connection', function(socket) {
     socket.on('nextRound', nextRound);
 
     function moveCard(c1toc2) {
+        if (!addedUser) return;
+
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
@@ -535,7 +559,7 @@ io.on('connection', function(socket) {
                     var c1_AP = CardArr[userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].type].AP;
                     var c2_AP = CardArr[userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].type].AP;
 
-                    for (var attacks = 0; attacks < c1_AP; attacks++) {
+                    for (let attacks = 0; attacks < c1_AP; attacks++) {
                         if (c2_HP > 0) {
                             c2_HP--;
                         } else {
@@ -544,7 +568,7 @@ io.on('connection', function(socket) {
                     }
                     if (c2_HP > 0) {
                         userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].HP = c2_HP;
-                        for (var attacks = 0; attacks < c1_HP; attacks++) {
+                        for (let attacks = 0; attacks < c2_AP; attacks++) {
                             if (c1_HP > 0) {
                                 c1_HP--;
                             } else {
@@ -572,35 +596,54 @@ io.on('connection', function(socket) {
     socket.on('moveCard', moveCard);
 
     function endGame(wincause) {
+        if (!addedUser || !isInGame()) return;
+
         const cgid = userlists.eo[socket.username].gid;
-        const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
 
-        if (userlists.g[cgid].Winner === null && userlists.g[cgid].WinCause === null) {
-            userlists.g[cgid].Winner = userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name;
-            userlists.g[cgid].WinCause = wincause;
+        var g = userlists.g[cgid];
 
-            userlists.eo[userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].User.name].wins++;
+        const iAmNr = g.Players[0].User.name === socket.username ? 0 : 1;
+
+        if (g.Winner === null && g.WinCause === null) {
+            g.Winner = g.Players[(iAmNr === 0 ? 1 : 0)].User.name;
+            g.WinCause = wincause;
+
+            userlists.eo[g.Players[(iAmNr === 0 ? 1 : 0)].User.name].wins++;
         }
 
-        io.in(cgid).emit('gameEnded', userlists.g[cgid]);
+        userlists.g[cgid] = g;
+
+        g.Players[0].deck.inBlock = Object.keys(g.Players[0].deck.inBlock).length;
+        g.Players[1].deck.inBlock = Object.keys(g.Players[1].deck.inBlock).length;
+
+        io.in(cgid).emit('gameEnded', g);
     }
     socket.on('giveUp', function() {
         endGame('given up');
     });
 
     function gameEnded() {
+        if (!addedUser) return;
+
+        const cgid = userlists.eo[socket.username].gid;
+        leaveGID(cgid);
+        userlists.eo[socket.username].gid = null;
+
         socket.state = 'results';
         sendState();
-        userlists.eo[socket.username].gid = null;
     }
     socket.on('gameEnded', gameEnded);
 
     function leaveGID(gid) {
+        if (!addedUser || !isInGame()) return;
+
         userlists.eo[socket.username].gid = null;
         socket.leave(gid);
     }
 
     function switchState(switchTo) {
+        if (!addedUser) return;
+
         if (states.indexOf(switchTo) !== -1) {
             const cgid = userlists.eo[socket.username].gid;
             if (cgid === null || ((socket.state === 'searching' || socket.state === 'waiting') && switchTo === 'lobby')) {
@@ -685,6 +728,17 @@ io.on('connection', function(socket) {
 
         socket.emit('loginProcessed', err);
     });
+
+    function isInGame() {
+        var isInGame = false;
+
+        if (socket.hasOwnProperty('username'))
+            if (socket.username !== '' && socket.state === 'inGame')
+                if (userlists.eo[socket.username].gid !== null)
+                    isInGame = true;
+
+        return isInGame;
+    }
 
     function logOut() {
         if (addedUser) {
