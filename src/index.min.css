@@ -66,6 +66,8 @@ body {
     .Card .CardInfo .CardEffects {
       font-size: 0.85em;
       margin-top: 0.25rem; }
+  .Card[alreadyUsed="false"][draggable="true"] {
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px 3px; }
   .Card[hoverable="true"]:hover, .Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
     /* width: calc(5.5rem * 2);

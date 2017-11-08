@@ -188,7 +188,8 @@ io.on('connection', function(socket) {
     socket.on('getUserlist', sendUserlist);
 
     function sendGame(alsoToEnemy, gid) {
-        if (!addedUser || !isInGame()) return;
+        if (!addedUser && !isInGame()) return;
+        if (!isInGame()) return;
 
         const sendToEnemy = alsoToEnemy || false;
         const cgid = gid || userlists.eo[socket.username].gid;
@@ -387,8 +388,6 @@ io.on('connection', function(socket) {
         g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock = Object.keys(g.Players[(iAmNr === 0 ? 1 : 0)].deck.inBlock).length;
 
         io.in(cgid).emit('gameStarted', g);
-
-        gameLoop();
     }
     socket.on('startGame', startGame);
 
@@ -397,11 +396,26 @@ io.on('connection', function(socket) {
 
         socket.state = 'inGame';
         sendState();
+
+        const cgid = userlists.eo[socket.username].gid;
+
+        if (userlists.g[cgid].Players[0].User.name === socket.username) {
+            gameLoop();
+        }
     }
     socket.on('gameStarted', gameStarted);
 
+    function viewGame(gid) {
+        if (!addedUser && !isInGame()) return;
+
+        sendGame(false, gid);
+    }
+    socket.on('viewGame', viewGame);
+
     function gameLoop() {
-        if (!addedUser || !isInGame()) return;
+        log('gameLoop >>', socket.username, socket.id, addedUser, isInGame());
+        if (!addedUser && !isInGame()) return;
+        if (!isInGame()) return;
 
         const cgid = userlists.eo[socket.username].gid;
         if (cgid !== null) {
@@ -422,7 +436,9 @@ io.on('connection', function(socket) {
     }
 
     function nextRound() {
-        if (!addedUser || !isInGame()) return;
+        log('nextRound >>', socket.username, socket.id, addedUser, isInGame());
+        if (!addedUser && !isInGame()) return;
+        if (!isInGame()) return;
 
         const cgid = userlists.eo[socket.username].gid;
         const iAmNr = userlists.g[cgid].Players[0].User.name === socket.username ? 0 : 1;
@@ -596,7 +612,8 @@ io.on('connection', function(socket) {
     socket.on('moveCard', moveCard);
 
     function endGame(wincause) {
-        if (!addedUser || !isInGame()) return;
+        if (!addedUser && !isInGame()) return;
+        if (!isInGame()) return;
 
         const cgid = userlists.eo[socket.username].gid;
 
@@ -635,7 +652,8 @@ io.on('connection', function(socket) {
     socket.on('gameEnded', gameEnded);
 
     function leaveGID(gid) {
-        if (!addedUser || !isInGame()) return;
+        if (!addedUser && !isInGame()) return;
+        if (!isInGame()) return;
 
         userlists.eo[socket.username].gid = null;
         socket.leave(gid);

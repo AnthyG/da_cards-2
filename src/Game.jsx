@@ -31,7 +31,7 @@ class RenderCardArr extends Component {
                             ooe={ooe} dt={dt} position={x}
                             rc={y} type={y.type}
                             hoverable={hoverable}
-                            dragable={dragable} dropable={dropable}
+                            dragable={y.alreadyUsed === false ? dragable : false} dropable={dropable}
                             key={ooe + '-' + dt + '-' + y.cid}
                             movecard={this.props.movecard} />
                     );
@@ -89,11 +89,14 @@ class DeckOnField extends Component {
         const cards = this.props.cards;
         const ooe = this.props.ooe;
 
+        const username = this.props.username;
+        const currentPlayer = this.props.currentplayer;
+
         return (
             <div className="deck-onField" ooe={ooe}>
                 <RenderCardArr arr={cards} dt="onField" ooe={ooe}
                     hoverable="dynamic"
-                    dragable={ooe === "own" && "true"}
+                    dragable={ooe === "own" && currentPlayer === username ? "true" : "false"}
                     dropable="true"
                     movecard={this.props.movecard} />
             </div>
@@ -141,6 +144,9 @@ class GameDeck extends Component {
         const P = this.props.p;
         const ooe = this.props.ooe;
 
+        const username = P.User.name;
+        const currentPlayer = this.props.currentplayer;
+
         return (
             <div className="deck" ooe={ooe}>
                 <PlayerInfo p={P} ooe={ooe} />
@@ -149,7 +155,8 @@ class GameDeck extends Component {
                 <DeckOnHand cards={P.deck.onHand} ooe={ooe}
                     movecard={this.props.movecard} />
                 <DeckOnField cards={P.deck.onField} ooe={ooe}
-                    movecard={this.props.movecard} />
+                    movecard={this.props.movecard}
+                    username={username} currentplayer={currentPlayer} />
             </div>
         );
     }
@@ -173,6 +180,8 @@ class Game extends Component {
             dis.setState({
                 g: g
             });
+
+            window.history.replaceState({}, g.gid, '/#' + g.gid);
         });
 
         socket.on('gameEnded', function (g) {
@@ -181,6 +190,8 @@ class Game extends Component {
             dis.setState({
                 g: g
             });
+
+            window.history.replaceState({}, g.gid, '/#' + g.gid);
         });
 
         socket.emit('getGame');
@@ -265,8 +276,8 @@ class Game extends Component {
                             <a className="currentPlayer">Enemies turn</a>
                         }
 
-                        <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} ooe="enemy" movecard={this.moveCard} />
-                        <GameDeck p={g.Players[iAmNr]} ooe="own" movecard={this.moveCard} />
+                        <GameDeck p={g.Players[(iAmNr === 0 ? 1 : 0)]} currentplayer={g.currentPlayer} ooe="enemy" movecard={this.moveCard} />
+                        <GameDeck p={g.Players[iAmNr]} currentplayer={g.currentPlayer} ooe="own" movecard={this.moveCard} />
                     </div>
                 }
             </div>

@@ -281,20 +281,19 @@ class Card extends Component {
 
         // getCard(type);
 
-        const description = C.description;
-        const alreadyUsed = rC.alreadyUsed;
+        const alreadyUsed = rC.alreadyUsed.toString();
         const roundsLeft = rC.roundsLeft;
         const MPS = C.MPS;
         const HP = rC.HP;
         const AP = C.AP;
-        const AT = C.AT;
-        const effects = rC.effects;
 
         const CardMark =
             <div className="Card" type={type} fob={fOb}
                 dt={dt} position={position} ooe={ooe}
+                alreadyused={alreadyUsed}
                 hoverable={hoverable}
-                draggable={dragable} dropable={dropable}
+                draggable={alreadyUsed === 'false' ? dragable : false}
+                dropable={alreadyUsed === 'false' ? dropable : false}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />

@@ -204,6 +204,8 @@ class App extends Component {
         socket.on('gameStarted', function (game) {
             log('gameStarted >>', game);
             socket.emit('gameStarted');
+
+            window.history.replaceState({}, game.gid, '/#' + game.gid);
         });
 
         // setInterval(function () {
@@ -226,6 +228,8 @@ class App extends Component {
             username: state.username,
             password: password
         });
+
+        window.history.replaceState({}, 'Lobby', '/');
     }
 
     handleLogout() {
@@ -234,6 +238,7 @@ class App extends Component {
         });
 
         socket.emit('logOut');
+        window.history.replaceState({}, 'logIn', '/');
     }
 
     handleStateChange() {
@@ -247,6 +252,9 @@ class App extends Component {
             'results': 'lobby'
         };
         const nstate = state2nstateArr[state];
+        
+        nstate === 'searching' && window.history.replaceState({}, 'Searching..', '/');
+        nstate === 'lobby' && window.history.replaceState({}, 'Lobby', '/');
 
         socket.emit('switchState', nstate);
     }
