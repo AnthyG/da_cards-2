@@ -68,6 +68,8 @@ body {
       margin-top: 0.25rem; }
   .Card[alreadyUsed="false"][draggable="true"] {
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px 3px; }
+  .Card[marked="true"] {
+    box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px; }
   .Card[hoverable="true"]:hover, .Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
     /* width: calc(5.5rem * 2);

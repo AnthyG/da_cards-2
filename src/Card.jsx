@@ -225,9 +225,12 @@ class CardEffects extends Component {
 class CardInfo extends Component {
     render() {
         const C = this.props.c;
+        const rC = this.props.rc;
 
         return (
             <div className="CardInfo">
+                {rC.marked && <span>This card is marked!</span>}
+                {rC.marked && <br />}
                 <span>AT: {C.AT}</span><br />
                 <span>Description: {C.description}</span><br />
                 <CardEffects effects={C.effects} />
@@ -261,6 +264,7 @@ class Card extends Component {
             "cid": null,
             "alreadyUsed": false,
             "roundsLeft": 0,
+            "marked": false,
             "MPS": 0,
             "HP": 0,
             "AP": 0,
@@ -283,6 +287,7 @@ class Card extends Component {
 
         const alreadyUsed = rC.alreadyUsed.toString();
         const roundsLeft = rC.roundsLeft;
+        const marked = rC.marked.toString();
         const MPS = C.MPS;
         const HP = rC.HP;
         const AP = C.AP;
@@ -290,7 +295,7 @@ class Card extends Component {
         const CardMark =
             <div className="Card" type={type} fob={fOb}
                 dt={dt} position={position} ooe={ooe}
-                alreadyused={alreadyUsed}
+                alreadyused={alreadyUsed} marked={marked}
                 hoverable={hoverable}
                 draggable={alreadyUsed === 'false' ? dragable : false}
                 dropable={alreadyUsed === 'false' ? dropable : false}
@@ -298,7 +303,7 @@ class Card extends Component {
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} />
                     <span className="CardName">{type}</span>
-                    <CardInfo c={C} />
+                    <CardInfo c={C} rc={rC} />
                     <CardCorner ctype="AP" value={AP} />
                     <CardCorner ctype="HP" value={HP} posX="R" />
                     <CardCorner ctype="roundsLeft" value={roundsLeft} posY="B" />

@@ -41,6 +41,9 @@
     &[alreadyUsed="false"][draggable="true"] {
         box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px 3px;
     }
+    &[marked="true"] {
+        box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px;
+    }
     &[hoverable="true"]:hover,
     &[hoverable="dynamic"]:not([type=""]):hover {
         z-index: 1;

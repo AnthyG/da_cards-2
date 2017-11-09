@@ -112,46 +112,7 @@ var userlists = {
         */
     },
     'o': [ /* user_name */ ],
-    'g': {
-        /*
-        'RoomID': roomid,
-        'Players': {
-            0: {
-                'User': {
-                    'name': user_1_name,
-                    'id': user_1_id
-                },
-                'roundsOff': 0,
-                'deck': {
-                    'onHand': {},
-                    'onField': {},
-                    'inBlock': {}
-                },
-                'MP-Left': 20
-            },
-            1: {
-                'User': {
-                    'name': user_2_name,
-                    'id': user_2_id
-                },
-                'roundsOff': 0,
-                'deck': {
-                    'onHand': {},
-                    'onField': {},
-                    'inBlock': {}
-                },
-                'MP-Left': 20
-            }
-        },
-        'Creationdate': Date().toString(),
-        'Winner': null,
-        'WinCause': null,
-        'currentPlayer': Players[Math.floor(Math.random() * 2)],
-        'roundLength': roundLengthNormal,
-        'timeRunning': 0,
-        'roundNumber': 0
-        */
-    },
+    'g': {},
     'gids': [ /* gid */ ]
 };
 
@@ -413,7 +374,7 @@ io.on('connection', function(socket) {
     socket.on('viewGame', viewGame);
 
     function gameLoop() {
-        log('gameLoop >>', socket.username, socket.id, addedUser, isInGame());
+        // log('gameLoop >>', socket.username, socket.id, addedUser, isInGame());
         if (!addedUser && !isInGame()) return;
         if (!isInGame()) return;
 
@@ -436,7 +397,7 @@ io.on('connection', function(socket) {
     }
 
     function nextRound() {
-        log('nextRound >>', socket.username, socket.id, addedUser, isInGame());
+        // log('nextRound >>', socket.username, socket.id, addedUser, isInGame());
         if (!addedUser && !isInGame()) return;
         if (!isInGame()) return;
 
@@ -451,14 +412,22 @@ io.on('connection', function(socket) {
             userlists.g[cgid].currentPlayer = userlists.g[cgid].Players[lastPlayerNr === 0 ? 1 : 0].User.name;
 
             for (let px = 0; px < 2; px++) {
+                var markAtCx = -1;
+                var markAtCxWHP = -1;
                 for (let cx in userlists.g[cgid].Players[px].deck.onField) {
                     if (userlists.g[cgid].Players[px].deck.onField[cx] !== null) {
                         // Check if the card has an effect, which disables it's ability to be used,
                         // and set alreadyUsed accordingly
                         userlists.g[cgid].Players[px].deck.onField[cx].alreadyUsed = false;
+                        userlists.g[cgid].Players[px].deck.onField[cx].marked = false;
 
                         if (userlists.g[cgid].Players[px].deck.onField[cx].roundsLeft >= 1) {
                             userlists.g[cgid].Players[px].deck.onField[cx].roundsLeft--;
+
+                            if (userlists.g[cgid].Players[px].deck.onField[cx].HP > markAtCxWHP) {
+                                markAtCxWHP = userlists.g[cgid].Players[px].deck.onField[cx].HP;
+                                markAtCx = cx;
+                            }
                         } else {
                             // Check if the card has an effect, that get's called on-death, and execute it,
                             // Afterwards, delete the card
@@ -466,6 +435,10 @@ io.on('connection', function(socket) {
                         }
                     }
                 }
+
+                // Mark card with highest HP, if there are any cards
+                if (markAtCx > -1)
+                    userlists.g[cgid].Players[px].deck.onField[markAtCx].marked = true;
 
                 // Serve new card from block into hand,
                 // if lastPlayerNr is this px,
@@ -594,12 +567,30 @@ io.on('connection', function(socket) {
                         if (c1_HP > 0) {
                             userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].HP = c1_HP;
                         } else if (c1_HP === 0) {
+                            if (userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position].marked) {
+                                userlists.g[cgid].Players[iAmNr].HP--;
+                                sendLog('You lost 1 HP!');
+
+                                if (userlists.g[cgid].Players[iAmNr].HP <= 0) {
+                                    endGame('death');
+                                }
+                            }
+
                             userlists.g[cgid].Players[iAmNr].deck[C1.dt][C1.position] = null;
-                            sendLog(C1 + " of yours has been destroyed by " + (iAmNr === 0 ? 1 : 0) + " with " + C2);
+                            sendLog('Your enemy destroyed', C1, 'with', C2);
                         }
                     } else if (c2_HP === 0) {
+                        if (userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position].marked) {
+                            userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].HP--;
+                            sendLog('You took 1 HP from your enemy!');
+
+                            if (userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].HP <= 0) {
+                                endGame('death', iAmNr);
+                            }
+                        }
+
                         userlists.g[cgid].Players[(iAmNr === 0 ? 1 : 0)].deck[C2.dt][C2.position] = null;
-                        sendLog(C2 + " of " + (iAmNr === 0 ? 1 : 0) + " has been destroyed by you with " + C1);
+                        sendLog('You destroyed', C2, 'with', C1);
                     }
 
                     sendToEnemy = true;
@@ -611,7 +602,7 @@ io.on('connection', function(socket) {
     }
     socket.on('moveCard', moveCard);
 
-    function endGame(wincause) {
+    function endGame(wincause, winner) {
         if (!addedUser && !isInGame()) return;
         if (!isInGame()) return;
 
@@ -622,7 +613,7 @@ io.on('connection', function(socket) {
         const iAmNr = g.Players[0].User.name === socket.username ? 0 : 1;
 
         if (g.Winner === null && g.WinCause === null) {
-            g.Winner = g.Players[(iAmNr === 0 ? 1 : 0)].User.name;
+            g.Winner = (winner === 0 || winner === 1) ? g.Players[winner].User.name : g.Players[(iAmNr === 0 ? 1 : 0)].User.name;
             g.WinCause = wincause;
 
             userlists.eo[g.Players[(iAmNr === 0 ? 1 : 0)].User.name].wins++;
