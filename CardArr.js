@@ -10,8 +10,8 @@ let CardArr = {
         "roundsLeft": 10,
         "marked": false,
         "MPS": 5,
-        "HP": 7,
-        "AP": 4,
+        "HP": 5,
+        "AP": 2,
         "AT": "Physical",
         "effects": {
             "Motivate 1": 0
@@ -28,11 +28,29 @@ let CardArr = {
         "roundsLeft": 10,
         "marked": false,
         "MPS": 5,
-        "HP": 7,
-        "AP": 4,
+        "HP": 5,
+        "AP": 2,
         "AT": "Physical",
         "effects": {
             "Motivate 2": 0
+        }
+    },
+    "Dwarf": {
+        "type": "Dwarf",
+        "x_px": 1,
+        "y_px": 1,
+        "frameNr": 1,
+        "description": "A Dwarf",
+        "cid": null,
+        "alreadyUsed": false,
+        "roundsLeft": 4,
+        "marked": false,
+        "MPS": 2,
+        "HP": 6,
+        "AP": 3,
+        "AT": "Physical",
+        "effects": {
+            "Blocker": 0
         }
     }
 };
