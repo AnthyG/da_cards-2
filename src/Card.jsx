@@ -150,20 +150,21 @@ class CardFace extends Component {
         const type = C.type;
         const curFrame = this.state.frame;
 
+        const zoom = 1.6;
+
         const cx = curFrame % C.x_px;
-        const cxm = C.x_px - cx - 1;
+        const cxm = -cx;
 
         const cy = (curFrame - curFrame % C.x_px) / C.x_px;
-        const cym = C.y_px - cy - 1;
+        const cym = -cy;
 
         return (
             <div className="CardFace"
-                style={type === "" ? { borderImage: 'url() fill' } : {
-                    borderImage: 'url(/Cards/Card-PNGs/' + type +
-                    '_Icon_Bordered.png) calc(85 * ' + cy + ') calc(55 * ' + cxm +
-                    ') calc(85 * ' + cym + ') calc(55 * ' + cx + ') fill'
-                    // Maybe rather do it like Duelyst does, with background instead of border..
-                    // I mean, that does look cleaner IMO :D
+                style={type === "" ? { backgroundImage: 'url()' } : {
+                    backgroundImage: 'url(/Cards/Card-PNGs/' + type + '_Icon_Bordered.png)',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'calc(' + C.x_px * 55 + 'px * ' + zoom + ') calc(' + C.y_px * 85 + 'px * ' + zoom + ')',
+                    backgroundPosition: 'calc(' + cxm * 55 + 'px * ' + zoom + ') calc(' + cym * 85 + 'px * ' + zoom + ')'
                 }}>{/* <h4>{curFrame}</h4> */}</div>
         );
     }

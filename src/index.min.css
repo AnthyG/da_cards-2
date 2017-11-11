@@ -40,6 +40,7 @@ body {
   font-family: FFFFORWA;
   font-stretch: condensed;
   font-style: normal;
+  cursor: default;
   font-weight: 100;
   font-size: 0.675rem;
   pointer-events: auto;
