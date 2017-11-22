@@ -2,11 +2,7 @@ language: node_js
 node_js:
   - "8"
 
-sudo: true
-
-cache:
-  directories:
-    - "node_modules"
+sudo: required
 
 env:
   global:
@@ -23,7 +19,9 @@ before_script:
   - "ls -alh"
 
   - echo "$FTP_PASSWORD | $FTP_USER | $FTP_HOST"
-  - "sshpass -p $FTP_PASSWORD ssh $FTP_USER@$FTP_HOST"
+  # - "sshpass -p $FTP_PASSWORD ssh $FTP_USER@$FTP_HOST"
+  - "ssh $FTP_USER@$FTP_HOST"
+  - "$FTP_PASSWORD"
 
   # - secure: ThEUqT+vQyVsxky5s80DHGZxbqhU+ztduJQIAhh2gh9l/0frvR1rIWG/pm6susWm8HZKfp4YQBmNCfvf7l18fRAoqo2uiIB+BD4zsHy+DXmbL2kHgYmVr+Ll8PiiEToSP+C71Iwfh69qI0ru3nphiH/nEhasGTnf65XLvXZKoZSacdtK7pdLuH2ABuZnOM8VXRD/dWhnpmaoHCqSpCm4zJkHxC+pvdTwI+s9bUj5q3EuxCw3rUE/PfDaBlYr83FuZAOe/vX+HTEIvxsnZco82+LD9SQjRGfkOfBsTqmy2Ha4JxCdN0S8dabGvK2OW1ICVzRApn01gogY4isQmRt948g1dFGwEfoRCj3JnA72LF8l4Rm12KC5JK6odLKKTPTrLe5rkDZFRAoI/qENlQW2eTpNnU4v2YHfco5PsVOi7SrNGmVNzAUoIHW+CpcMzrjkQFc+WOemNFZO561KDJWh/8WSQ28wn88eVdPvPRLFxARhWhKM0d519y9g1uRkaD+Tm+++EYvqlwuAsfHWTAjQQHQO1usYB0Ua8gWldfMgSy1Pk4UrarbCOHY3b+J/T3ZztuQBqglEW+SZpxPWy93dbM5RFaQFq27YwknXMrBP9FCMbXMO22nP2jnm8wQsVfYQBWpE72+6uPILAj/0ptLPUi8K0ApwoZLve6LWj8Y4LMI=
 
@@ -41,3 +39,7 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
+
+cache:
+  directories:
+    - "node_modules"
