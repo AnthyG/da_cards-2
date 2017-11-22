@@ -15,6 +15,11 @@ env:
 
 before_script:
   - "ls -alh"
+
+  - secure: iopLp4r1DaTrgm5sehO9c0DxoQzOE+GeQd3HimWs8UeDYxPMpObyD3irh3nstowUOHC3SrE8lCvW8XzM33OcjdFS98kJYyhHXf1YCgbS65edKNIPLE7M5bJ0y+UriIhT7J0ML0q16LToKuv0bLIMFL8gEgdzaKpiH3HOf5vOrJJrjUdb0K8haIFucPtUc+oQu/Yoy5PgroFbv+3R1Pks5Sc05VlX5pewJGtfxWW86+qoBm9JEBgScr/GGr/K8HVfL7nJT8ZnLQAxLGiCSzJD0yChNQeuvd0wp8ivgif5Zd/f6FcgsbLTo3AvmBejko3LQWzHMbHs8zEozsxlWcE1v2fiNXbovRqwAeObH/BjKJ5/iPsqG3rw+yCeHAkaR94gJIMsQzpZ3LR3nv0Pg9n1yLPCc4aCxcEujZ8Aj+7IPDZmP5rHuZPlUVcwOgMmBoFsghRqXQC+v3LPVcbfiDfcR9V58Bx14JdNGHnX2J2p2A8kEEn120nCgVb9h00VpEW6XtVPSbGsFUL91B9pA7V6vzI+Lhj68jgtUqJry6dLo5ud2C2Y2LYrUoj2PFKCmWwLWR2WqV+wjzpg/QX2EsLaYBsP/WKnnzRhk5l4xJ+xD6sXMnx037kA/U2wFV7vfMDFc9KhBFvdZOLVXkc00OwJ0Fy731oFtlBgeBks15ahawk=
+  - "ls -a"
+  - "quit"
+
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
