@@ -15,15 +15,18 @@ env:
 
 before_install:
   # sudo apt-get install sftp
+  sudo apt-get install openssh-server
+  sudo apt-get install sshpass
 
 before_script:
   - "ls -alh"
 
-  - "ftp -help"
-  - "curl -V"
+  - "export SSHPASS=$FTP_PASSWORD"
+
+  - secure: ZH/ResGzOlnhJgs4oIz94Utzo75EKa8EDwZ9TpZaPrZAc3QxLZMmoupV/tONiHF2/WgPH1HaiTBFqkHPO26igJzO1O2lkenfKg2yyZiwxb/m/kQ5vJI/98zv7vnkQcjToA7SJjzNaB7ZkCBu8bNO5iWfvCteUQHbFJ8qCksGEHGnINuff1hSAWrCaGP5DtrhSvcASw3YofKPTn6OA5QWvLkQ7RcT+mPtvUm12L/4U1kwjj2OyqO3OiUSZ/RWo+/STrLxuPBBk9Mv7o2dKK5UEjbV21nb7jsgC7DlALZTWUuLBaiK1VClxfPLN296xQiI1dRLkJSHmkuAZDHkkB5IMyynsJbG4GuYretDaty6Dt4lv8vwB/WrdDjjaviRMLqd5ngYBRZN4oKqZsJLxhJQNiR5VT+COkVh5KJP4+bTjEJzSAKrLkt851qkEBujlH6Mwl07XhjO+DQ/U5Wh3enScEncQUsGLD+iQhc24fNc2IAFAcIlpXmFc2rk1d4eJOIH5gf1OnSXqmzq/hcAXp6tgXiuFH6chRkArglhi6fIKR7LKiXiSJRlRB+CGvdZgEMvQBOnszJYk3j32WoaeF8UsbYR/d5osjos6P/VMGzYB5JBOt6DovHL5mjVlSgcX9qBnrUvy/XARo71RdlmXcAvpOOWUo70ORXzZK7R6ebTysI=
   # - secure: iopLp4r1DaTrgm5sehO9c0DxoQzOE+GeQd3HimWs8UeDYxPMpObyD3irh3nstowUOHC3SrE8lCvW8XzM33OcjdFS98kJYyhHXf1YCgbS65edKNIPLE7M5bJ0y+UriIhT7J0ML0q16LToKuv0bLIMFL8gEgdzaKpiH3HOf5vOrJJrjUdb0K8haIFucPtUc+oQu/Yoy5PgroFbv+3R1Pks5Sc05VlX5pewJGtfxWW86+qoBm9JEBgScr/GGr/K8HVfL7nJT8ZnLQAxLGiCSzJD0yChNQeuvd0wp8ivgif5Zd/f6FcgsbLTo3AvmBejko3LQWzHMbHs8zEozsxlWcE1v2fiNXbovRqwAeObH/BjKJ5/iPsqG3rw+yCeHAkaR94gJIMsQzpZ3LR3nv0Pg9n1yLPCc4aCxcEujZ8Aj+7IPDZmP5rHuZPlUVcwOgMmBoFsghRqXQC+v3LPVcbfiDfcR9V58Bx14JdNGHnX2J2p2A8kEEn120nCgVb9h00VpEW6XtVPSbGsFUL91B9pA7V6vzI+Lhj68jgtUqJry6dLo5ud2C2Y2LYrUoj2PFKCmWwLWR2WqV+wjzpg/QX2EsLaYBsP/WKnnzRhk5l4xJ+xD6sXMnx037kA/U2wFV7vfMDFc9KhBFvdZOLVXkc00OwJ0Fy731oFtlBgeBks15ahawk=
-  # - "ls -a"
-  # - "quit"
+  - "ls -a"
+  - "quit"
 
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
