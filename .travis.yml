@@ -14,7 +14,7 @@ env:
     - secure: yxCA/B5/x9iT/Jp/YsgvDCz/KzrRaCjQoW0GtsIeTSx6MYh/k9rDbyfhC163rOZR03RcW7pNlUypSrKzjxfmQERSbKSsnFJ6URFh2mSms2XXEUvy4TPaL8LQni74Qynd16LwjzaFCzt6C572zf4QLGUrw3ZMdQQ3aaXwpzEYAQ/1s1P7danT2aeiF+qOCQlkAlRT4pOK/sKA3UMxKqrd/D3y0M530WotdOKwaGXLuoldbznhRhh6ZWjXcUf7wUeULvX6erCyxAIThxuNF27KB/uzASJm0KZiwUo0BAVXlTGQiUbmy2KQTMUBNGdE4kB+cNl2H78ZfQmfC8pIsqxaqbv9fsGOERtTijDuLDaelJlDl/3bAbz/IWelYDAZcsjh+x/u0+6E2fEO5/dQQngOP5cOn1mrGZsc2TUWeynWUNx9tjHh8JB6OzSTHsdnGqvWZd5RUZwlGEDe/hIouMMd4AospD4niBvB0xFSd4pjcErDIaz+jS5yxwxTRa6w1juaVOnzplNXZy3VbO8vCnwU+8zEvqBZQNC7rRzP+PP6VWgO3rkOsaIR0FgI7soGU6mFxAslGMb/2ZVspna43xkDGIw9IaRST5idkkn4DSeWH0LwTVogSS+idCsqU3JKRBMkdIp8gbYAA/XgH5xIjFXuJLnzk/OUZjiB24bU9arb+JM=
 
 before_install:
-  sudo apt-get install sftp
+  # sudo apt-get install sftp
 
 before_script:
   - "ls -alh"
