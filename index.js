@@ -4,8 +4,10 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = process.env.PORT || 3000; // In Windows 'set PORT=3000&&node index.js'; In Linux 'PORT=3000 node index.js'
 var fs = require('fs');
+
+var port = process.env.PORT || 3000; // In Windows 'set PORT=3000&&node index.js'; In Linux 'PORT=3000 node index.js'
+var privatePath = process.env.PRIVATEPATH || 'PRIVATE';
 
 /* MODIFIED FROM https://stackoverflow.com/a/1985471/5712160 */
 var arrRotate = function arrRotate(arr, count) {
@@ -26,7 +28,7 @@ var log = function log(...m) {
 var loginlist = [];
 
 function getLoginList(cb) {
-    loginlist = eval(fs.readFileSync(__dirname + '/PRIVATE/loginlist.js', 'UTF-8'));
+    loginlist = eval(fs.readFileSync(__dirname + '/' + privatePath + '/loginlist.js', 'UTF-8'));
 
     typeof cb === 'function' && cb();
 }
