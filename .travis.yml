@@ -11,5 +11,5 @@ before_script:
   - "export PORT=80"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
-  - "npm serve"
+  - "npm run serve"
   - sleep 5
