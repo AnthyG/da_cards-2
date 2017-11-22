@@ -8,8 +8,8 @@ cache:
 
 before_script:
   - "export DISPLAY=:99.0"
+  - "export PORT=80"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
-  - "sudo set PORT=80"
   - "npm serve"
   - sleep 5
