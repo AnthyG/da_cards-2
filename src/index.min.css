@@ -212,7 +212,7 @@ body {
       background-color: #DDDDDD; }
       .App-game .App-game-decks .deck .PlayerInfo {
         bottom: 0;
-        z-index: 1;
+        z-index: 2;
         display: block;
         position: absolute; }
         .App-game .App-game-decks .deck .PlayerInfo .MP,
@@ -230,7 +230,7 @@ body {
       .App-game .App-game-decks .deck .deck-onHand,
       .App-game .App-game-decks .deck .deck-onField,
       .App-game .App-game-decks .deck .deck-inBlock {
-        z-index: 1;
+        z-index: 2;
         display: block;
         position: absolute;
         min-width: calc(5.5rem + 0.25rem * 2);
@@ -251,7 +251,7 @@ body {
           .App-game .App-game-decks .deck .deck-onHand .Card .CardBG {
             width: calc(5.5rem * 1); }
       .App-game .App-game-decks .deck .deck-onField {
-        z-index: 0;
+        z-index: 1;
         bottom: 1.25rem;
         padding: 0 8.5rem;
         background-color: #FF0000; }
