@@ -122,32 +122,46 @@ class CardFace extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            frame: 0
+            frame_face: 0,
+            frame_bg: 0
         };
     }
 
     draw() {
         const C = this.props.c;
-        const curFrame = this.state.frame;
+        const curFrame_face = this.state.frame_face;
+        const curFrame_bg = this.state.frame_bg;
+        
+        const x_px_face = C.animations.face.x_px;
 
-        const zoom = 1;
+        const cx_face = curFrame_face % x_px_face;
 
-        const cx = curFrame % C.x_px;
-        const cxm = -cx;
+        const cy_face = (curFrame_face - curFrame_face % x_px_face) / x_px_face;
+        
+                
+        const x_px_bg = C.animations.bg.x_px;
 
-        const cy = (curFrame - curFrame % C.x_px) / C.x_px;
-        const cym = -cy;
+        const cx_bg = curFrame_bg % x_px_bg;
+
+        const cy_bg = (curFrame_bg - curFrame_bg % x_px_bg) / x_px_bg;
+
 
         const dis = this;
 
         const cvs = dis.cvs;
         const ctx = dis.ctx;
-        const img_icon = dis.img_icon;
+
+        const img_face = dis.img_face;
+        const img_bg = dis.img_bg;
 
         this.ctx.clearRect(0, 0, cvs.width, cvs.height);
         
-        if (img_icon.src) {
-            ctx.drawImage(img_icon, cx * 55, cy * 85, 55, 85, 0, 0, 55, 85);
+        if (img_bg.src) {
+            ctx.drawImage(img_bg, cx_bg * 55, cy_bg * 85, 55, 85, 0, 0, 55, 85);
+        }
+        
+        if (img_face.src) {
+            ctx.drawImage(img_face, cx_face * 55, cy_face * 85, 55, 85, 0, 0, 55, 85);
         }
     }
 
@@ -162,22 +176,22 @@ class CardFace extends Component {
         this.cvs.height = 85;
 
         this.ctx = this.cvs.getContext('2d');
-        // this.ctx.scale(2, 2);
 
-        this.img_icon = new Image();
-        
-        // this.img_icon.width = C.x_px * 55;
-        // this.img_icon.height = C.y_px * 85;
+        this.img_face = new Image();
+        this.img_bg = new Image();
 
         const dis = this;
-        this.img_icon.onload = function() {
-            dis.timerID = setInterval(
-                () => dis.tick(),
-                120
-            );
+        this.img_face.onload = function() {
+            dis.img_bg.onload = function() {
+                dis.timerID = setInterval(
+                    () => dis.tick(),
+                    120
+                );
+            };
+            dis.img_bg.src = '/Cards/Card-PNGs/' + type + '_Border.png';
         };
 
-        this.img_icon.src = '/Cards/Card-PNGs/' + type + '_Icon.png';
+        this.img_face.src = '/Cards/Card-PNGs/' + type + '_Icon.png';
 
     }
 
@@ -187,25 +201,24 @@ class CardFace extends Component {
 
     tick() {
         const C = this.props.c;
-        const curFrame = this.state.frame;
+        const curFrame_face = this.state.frame_face;
+        const curFrame_bg = this.state.frame_bg;
 
         this.draw();
 
         this.setState({
-            frame: (curFrame + 1 < C.frameNr ? curFrame + 1 : 0)
+            frame_face: (curFrame_face + 1 < C.animations.face.frameNr ? curFrame_face + 1 : 0),
+            frame_bg: (curFrame_bg + 1 < C.animations.bg.frameNr ? curFrame_bg + 1 : 0)
         });
     }
 
     render() {
-        const C = this.props.c;
         const rC = this.props.rc;
-        const type = C.type;
-        const curFrame = this.state.frame;
 
         return (
             <div className="CardFace">
                 <canvas id={"Card-" + rC.cid}></canvas>
-            {/* {<h4>{curFrame}</h4>} */}</div>
+            </div>
         );
     }
 }
@@ -298,9 +311,18 @@ class Card extends Component {
 
         var C = {
             "type": "",
-            "x_px": 0,
-            "y_px": 0,
-            "frameNr": 0,
+            "animations": {
+                "face": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                },
+                "bg": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                }
+            },
             "description": "",
             "cid": null,
             "alreadyUsed": false,

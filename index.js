@@ -319,8 +319,7 @@ io.on('connection', function(socket) {
                             if (modeP === true) {
                                 arr[b].position = b;
                             }
-                            delete arr[b].x_px;
-                            delete arr[b].y_px;
+                            delete arr[b].animations;
                             delete arr[b].frameNr;
                             delete arr[b].description;
                             delete arr[b].MPS;

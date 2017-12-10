@@ -1,9 +1,18 @@
 let CardArr = {
     "King": {
         "type": "King",
-        "x_px": 9, // 495px
-        "y_px": 6, // 510px
-        "frameNr": 48,
+        "animations": {
+            "face": {
+                "x_px": 9, // 495px
+                "y_px": 6, // 510px
+                "frameNr": 48
+            },
+            "bg": {
+                "x_px": 1,
+                "y_px": 1,
+                "frameNr": 1
+            }
+        },
         "description": "The King.",
         "cid": null,
         "alreadyUsed": false,
@@ -19,8 +28,18 @@ let CardArr = {
     },
     "Queen": {
         "type": "Queen",
-        "x_px": 1, // 55px
-        "y_px": 1, // 85px
+        "animations": {
+            "face": {
+                "x_px": 1, // 55px
+                "y_px": 1, // 85px
+                "frameNr": 1
+            },
+            "bg": {
+                "x_px": 1,
+                "y_px": 1,
+                "frameNr": 1
+            }
+        },
         "frameNr": 1,
         "description": "The Queen.",
         "cid": null,
@@ -37,9 +56,18 @@ let CardArr = {
     },
     "Dwarf": {
         "type": "Dwarf",
-        "x_px": 1,
-        "y_px": 1,
-        "frameNr": 1,
+        "animations": {
+            "bg": {
+                "x_px": 1, // 55px
+                "y_px": 1, // 85px
+                "frameNr": 1
+            },
+            "border": {
+                "x_px": 1,
+                "y_px": 1,
+                "frameNr": 1
+            }
+        },
         "description": "A Dwarf",
         "cid": null,
         "alreadyUsed": false,
