@@ -70,7 +70,7 @@ body {
   .Card[alreadyUsed="false"][draggable="true"] {
     box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px 3px; }
   .Card[marked="true"] {
-    box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px; }
+    box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px !important; }
   .Card[hoverable="true"]:hover, .Card[hoverable="dynamic"]:not([type=""]):hover {
     z-index: 1;
     /* width: calc(5.5rem * 2);
@@ -110,6 +110,7 @@ body {
     bottom: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
     position: absolute;
     backface-visibility: hidden;
     background-repeat: no-repeat;
@@ -121,6 +122,16 @@ body {
     image-rendering: pixelated;
     image-rendering: optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor; }
+    .Card .CardFG canvas,
+    .Card .CardBG canvas,
+    .Card .CardFace canvas {
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      position: absolute; }
   .Card .CardName {
     left: 50%;
     bottom: 10%;
@@ -219,6 +230,7 @@ body {
       .App-game .App-game-decks .deck .deck-onHand,
       .App-game .App-game-decks .deck .deck-onField,
       .App-game .App-game-decks .deck .deck-inBlock {
+        z-index: 1;
         display: block;
         position: absolute;
         min-width: calc(5.5rem + 0.25rem * 2);
@@ -239,6 +251,7 @@ body {
           .App-game .App-game-decks .deck .deck-onHand .Card .CardBG {
             width: calc(5.5rem * 1); }
       .App-game .App-game-decks .deck .deck-onField {
+        z-index: 0;
         bottom: 1.25rem;
         padding: 0 8.5rem;
         background-color: #FF0000; }

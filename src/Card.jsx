@@ -126,11 +126,59 @@ class CardFace extends Component {
         };
     }
 
+    draw() {
+        const C = this.props.c;
+        const curFrame = this.state.frame;
+
+        const zoom = 1;
+
+        const cx = curFrame % C.x_px;
+        const cxm = -cx;
+
+        const cy = (curFrame - curFrame % C.x_px) / C.x_px;
+        const cym = -cy;
+
+        const dis = this;
+
+        const cvs = dis.cvs;
+        const ctx = dis.ctx;
+        const img_icon = dis.img_icon;
+
+        this.ctx.clearRect(0, 0, cvs.width, cvs.height);
+        
+        if (img_icon.src) {
+            ctx.drawImage(img_icon, cx * 55, cy * 85, 55, 85, 0, 0, 55, 85);
+        }
+    }
+
     componentDidMount() {
-        this.timerID = setInterval(
-            () => this.tick(),
-            120
-        );
+        const C = this.props.c;
+        const rC = this.props.rc;
+        const type = C.type;
+
+        this.cvs = document.getElementById('Card-' + rC.cid);
+
+        this.cvs.width = 55;
+        this.cvs.height = 85;
+
+        this.ctx = this.cvs.getContext('2d');
+        // this.ctx.scale(2, 2);
+
+        this.img_icon = new Image();
+        
+        // this.img_icon.width = C.x_px * 55;
+        // this.img_icon.height = C.y_px * 85;
+
+        const dis = this;
+        this.img_icon.onload = function() {
+            dis.timerID = setInterval(
+                () => dis.tick(),
+                120
+            );
+        };
+
+        this.img_icon.src = '/Cards/Card-PNGs/' + type + '_Icon.png';
+
     }
 
     componentWillUnmount() {
@@ -140,6 +188,9 @@ class CardFace extends Component {
     tick() {
         const C = this.props.c;
         const curFrame = this.state.frame;
+
+        this.draw();
+
         this.setState({
             frame: (curFrame + 1 < C.frameNr ? curFrame + 1 : 0)
         });
@@ -147,25 +198,14 @@ class CardFace extends Component {
 
     render() {
         const C = this.props.c;
+        const rC = this.props.rc;
         const type = C.type;
         const curFrame = this.state.frame;
 
-        const zoom = 1.6;
-
-        const cx = curFrame % C.x_px;
-        const cxm = -cx;
-
-        const cy = (curFrame - curFrame % C.x_px) / C.x_px;
-        const cym = -cy;
-
         return (
-            <div className="CardFace"
-                style={type === "" ? { backgroundImage: 'url()' } : {
-                    backgroundImage: 'url(/Cards/Card-PNGs/' + type + '_Icon_Bordered.png)',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'calc(' + C.x_px * 55 + 'px * ' + zoom + ') calc(' + C.y_px * 85 + 'px * ' + zoom + ')',
-                    backgroundPosition: 'calc(' + cxm * 55 + 'px * ' + zoom + ') calc(' + cym * 85 + 'px * ' + zoom + ')'
-                }}>{/* <h4>{curFrame}</h4> */}</div>
+            <div className="CardFace">
+                <canvas id={"Card-" + rC.cid}></canvas>
+            {/* {<h4>{curFrame}</h4>} */}</div>
         );
     }
 }
@@ -281,6 +321,9 @@ class Card extends Component {
         const dt = this.props.dt;
         const ooe = this.props.ooe;
 
+        if (!rC.cid)
+            rC.cid = "cid-undefined-" + Math.random().toString(16).slice(2) + "-" + (new Date()).getTime()
+
         const dragable = this.props.dragable || "false";
         const dropable = this.props.dropable || "false";
 
@@ -302,7 +345,7 @@ class Card extends Component {
                 dropable={alreadyUsed === 'false' ? dropable : false}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
-                    <CardFace c={C} />
+                    <CardFace c={C} rc={rC} />
                     <span className="CardName">{type}</span>
                     <CardInfo c={C} rc={rC} />
                     <CardCorner ctype="AP" value={AP} />

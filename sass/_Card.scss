@@ -43,7 +43,7 @@
         box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px 3px;
     }
     &[marked="true"] {
-        box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px;
+        box-shadow: rgba(0, 144, 255, 0.5) 0px 2px 4px 2px !important;
     }
     &[hoverable="true"]:hover,
     &[hoverable="dynamic"]:not([type=""]):hover {
@@ -98,6 +98,7 @@
         bottom: 0;
         width: 100%;
         height: 100%;
+        overflow: hidden;
         position: absolute;
         backface-visibility: hidden;
         background-repeat: no-repeat;
@@ -109,6 +110,15 @@
         image-rendering: pixelated;
         image-rendering: optimize-contrast;
         -ms-interpolation-mode: nearest-neighbor;
+        & canvas {
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
     }
     & .CardName {
         left: 50%;

@@ -75,6 +75,7 @@
             & .deck-onHand,
             & .deck-onField,
             & .deck-inBlock {
+                z-index: 1;
                 display: block;
                 position: absolute;
                 min-width: calc(5.5rem + 0.25rem * 2);
@@ -104,6 +105,7 @@
                 // }
             }
             & .deck-onField {
+                z-index: 0;
                 bottom: 1.25rem;
                 padding: 0 8.5rem;
                 background-color: #FF0000;
