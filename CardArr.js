@@ -57,12 +57,12 @@ let CardArr = {
     "Dwarf": {
         "type": "Dwarf",
         "animations": {
-            "bg": {
+            "face": {
                 "x_px": 1, // 55px
                 "y_px": 1, // 85px
                 "frameNr": 1
             },
-            "border": {
+            "bg": {
                 "x_px": 1,
                 "y_px": 1,
                 "frameNr": 1
