@@ -336,6 +336,10 @@ io.on('connection', function(socket) {
             }
             return ARRAYTHINGIEd;
         }
+
+        // This part is kinda unfair, except the onField of course
+        // Because it means, that both players can or rather, most probably will,
+        // get a different number of the same card.!
         for (var xa = 0; xa < 2; xa++) {
             userlists.g[cgid].Players[xa].deck.onHand = generatedeckthingieandreturn(5);
             userlists.g[cgid].Players[xa].deck.onField = generatedeckthingieandreturn(13, false, true);
