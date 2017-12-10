@@ -363,8 +363,8 @@ class Card extends Component {
                 dt={dt} position={position} ooe={ooe}
                 alreadyused={alreadyUsed} marked={marked}
                 hoverable={hoverable}
-                draggable={alreadyUsed === 'false' ? dragable : false}
-                dropable={alreadyUsed === 'false' ? dropable : false}
+                draggable={alreadyUsed === 'false' ? dragable : 'false'}
+                dropable={alreadyUsed === 'false' ? dropable : 'false'}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
                     <CardFace c={C} rc={rC} />
