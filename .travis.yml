@@ -15,9 +15,7 @@ env:
 install:
 - npm install
 before_script:
-- ls -alh
 - cp -r PRIVATE_open PRIVATE
-- ls -alh
 - npm run serve &
 - sleep 5
 - export DISPLAY=:99.0
@@ -26,7 +24,7 @@ before_script:
 after_success:
 - ls -alh
 - echo "|1|kRYjSPXegK5AQG/nDXXXH06Fi88=|lcTcYVYZsfucZrxECzkn5Ur1AKk= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMXtTexoOC/lQ990KmhHsp1HPYs/YJTS5Zlx2U3a3l6rgeeKjY11pYxGI7mdBXgKXM0D9UcoWCVRlVET8rZcJJU=">> $HOME/.ssh/known_hosts
-- sshpass -p $FTP_PASSWORD ssh $FTP_USER@$FTP_HOST -t "ls -alh; cd $TRAVISPATH; [ -d $REPOPATH ] && rm -r $REPOPATH; git clone --depth=50 --branch=master https://github.com/$REPOPATH.git $REPOPATH && cd $REPOPATH && ls -alh;"
+- sshpass -p $FTP_PASSWORD ssh $FTP_USER@$FTP_HOST -t "cd $TRAVISPATH; [ -d $REPOPATH ] && rm -r $REPOPATH; git clone --depth=50 --branch=master https://github.com/$REPOPATH.git $REPOPATH && cd $REPOPATH && ls;"
 cache:
   directories:
   - node_modules
