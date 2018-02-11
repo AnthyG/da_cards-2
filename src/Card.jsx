@@ -9,20 +9,58 @@ import { s_address } from './addresses.js';
 
 import { log, err } from './logerr.js';
 
+var tryRequests = {
+    cards: [],
+    effects: []
+};
+
+// setInterval(function() {
+//     if (tryRequests.cards.length > 0) {
+//         for (var ti in tryRequests.cards) {
+//             var t = tryRequests.cards[ti];
+
+//             getCard(t);
+//         }
+//     }
+//     if (tryRequests.effects.length > 0) {
+//         for (var ti in tryRequests.effects) {
+//             var t = tryRequests.effects[ti];
+
+//             getCardEffect(t);
+//         }
+//     }
+// }, 10000);
+
 var CardArr = {};
 function getCardArr(cb) {
-    request('GET', s_address + '/cards').done((res)=>{
-        CardArr = JSON.parse(res.body);
+    request('GET', s_address + '/cards').done((res) => {
+        try {
+            CardArr = JSON.parse(res.body);
+        } catch(error) {
+            err(error);
+        }
 
         typeof cb === "function" && cb(CardArr, res);
     });
 }
 // getCardArr();
 function getCard(type, cb) {
-    request('GET', s_address + '/card/' + type).done((res)=>{
-        // log("getCard", type, res);
+    request('GET', s_address + '/card/' + type).done((res) => {
+        log("getCard", type, res);
 
-        CardArr[type] = JSON.parse(res.body);
+        try {
+            CardArr[type] = JSON.parse(res.body);
+
+            if (tryRequests.cards.indexOf(type) !== -1) {
+                tryRequests.cards.splice(tryRequests.cards.indexOf(type), 1);
+            }
+        } catch(error) {
+            err(error);
+            
+            if (tryRequests.cards.indexOf(type) === -1) {
+                tryRequests.cards.push(type);
+            }
+        }
 
         typeof cb === "function" && cb(CardArr[type], res);
     });
@@ -31,18 +69,34 @@ function getCard(type, cb) {
 
 var CardEffectsArr = {};
 function getCardEffectsArr(cb) {
-    request('GET', s_address + '/cardeffects').done((res)=>{
-        CardEffectsArr = JSON.parse(res.body);
+    request('GET', s_address + '/cardeffects').done((res) => {
+        try {
+            CardEffectsArr = JSON.parse(res.body);
+        } catch(error) {
+            err(error);
+        }
 
         typeof cb === "function" && cb(CardEffectsArr, res);
     });
 }
 // getCardEffectsArr();
 function getCardEffect(type, cb) {
-    request('GET', s_address + '/cardeffect/' + type).done((res)=>{
-        // log("getCardEffect", type, res);
+    request('GET', s_address + '/cardeffect/' + type).done((res) => {
+        log("getCardEffect", type, res);
 
-        CardEffectsArr[type] = JSON.parse(res.body);
+        try {
+            CardEffectsArr[type] = JSON.parse(res.body);
+
+            if (tryRequests.effects.indexOf(type) !== -1) {
+                tryRequests.effects.splice(tryRequests.effects.indexOf(type), 1);
+            }
+        } catch(error) {
+            err(error);
+            
+            if (tryRequests.effects.indexOf(type) === -1) {
+                tryRequests.effects.push(type);
+            }
+        }
 
         typeof cb === "function" && cb(CardEffectsArr[type], res);
     });
@@ -279,10 +333,21 @@ class CardEffect extends Component {
             && this.props.type !== null && this.props.type) {
             getCardEffect(this.props.type, function(rbody, res) {
                 // log(rbody, res);
+            
+                function getCardEffectIntervalFunc() {
+                    getCardEffect(dis.props.type, function(rbody, res) {
+                        if (rbody) {
+                            clearInterval(getCardEffectInterval);
+    
+                            dis.setState({
+                                effectInfoLoaded: true
+                            });
+                        }
+                    });
+                }
+                getCardEffectIntervalFunc();
 
-                dis.setState({
-                    effectInfoLoaded: true
-                });
+                var getCardEffectInterval = setInterval(getCardEffectIntervalFunc, 10000);
             });   
         }
     }
@@ -360,17 +425,77 @@ class Card extends Component {
     componentDidMount() {
         var dis = this;
 
-        // log("check: ", this.props.type, !CardArr.hasOwnProperty(this.props.type), this.props.type !== null, !!this.props.type);
+        const checkID = (Math.floor((Math.random() * 90000) + 10000)).toString();
 
-        if (!CardArr.hasOwnProperty(this.props.type)
-            && this.props.type !== null && !!this.props.type) {
-            getCard(this.props.type, function(rbody, res) {
-                // log(rbody, res);
+        log("check: ", checkID, this.props.type, !CardArr.hasOwnProperty(this.props.type), this.props.type !== null, !!this.props.type);
 
-                dis.setState({
-                    cardInfoLoaded: true
+        var oC = {
+            "type": "",
+            "animations": {
+                "face": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                },
+                "bg": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                }
+            },
+            "description": "",
+            "cid": null,
+            "alreadyUsed": false,
+            "roundsLeft": 0,
+            "marked": false,
+            "MPS": 0,
+            "HP": 0,
+            "AP": 0,
+            "AT": "",
+            "effects": {}
+        };
+
+        var C = {};
+
+        const type = this.props.type;
+
+        if (CardArr.hasOwnProperty(type))
+            C = CardArr[type];
+
+        var rC = this.props.rc || {};
+
+        var error = false;
+        for (var p in oC) {
+            var pv = C[p];
+            if (!C.hasOwnProperty(p))
+                error = true;
+            if (!rC.hasOwnProperty(p))
+                error = true;
+        }
+
+        log("check 2: ", checkID, this.props.type, !CardArr.hasOwnProperty(this.props.type), this.props.type !== null, !!this.props.type, error);
+
+        if ((!CardArr.hasOwnProperty(this.props.type) || error) &&
+            this.props.type !== null && !!this.props.type
+        ) {
+            log("gettingCard: ", checkID);
+            
+            function getCardIntervalFunc() {
+                getCard(dis.props.type, function(rbody, res) {
+                    log("getCard: ", checkID, rbody, res);
+
+                    if (rbody) {
+                        clearInterval(getCardInterval);
+
+                        dis.setState({
+                            cardInfoLoaded: true
+                        });
+                    }
                 });
-            });
+            }
+            getCardIntervalFunc();
+
+            var getCardInterval = setInterval(getCardIntervalFunc, 10000);
         }
     }
 
@@ -406,22 +531,29 @@ class Card extends Component {
             "AT": "",
             "effects": {}
         };
+
         var C = {};
+
         const type = this.props.type;
+        
+        const checkID = (Math.floor((Math.random() * 90000) + 10000)).toString();
+
         if (CardArr.hasOwnProperty(type))
             C = CardArr[type];
         else
             C = JSON.parse(JSON.stringify(oC));
 
-        log("set (or not), C", CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, this.props.rc ? JSON.parse(JSON.stringify(this.props.rc)) : this.props.rc);
+        log("set (or not), C", checkID, JSON.parse(JSON.stringify(this.state.stateC)), CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, this.props.rc ? JSON.parse(JSON.stringify(this.props.rc)) : this.props.rc);
 
-        const rC = this.props.rc || JSON.parse(JSON.stringify(C));
+        var rC = this.props.rc || JSON.parse(JSON.stringify(C));
         const position = this.props.position;
         const dt = this.props.dt;
         const ooe = this.props.ooe;
 
         if (rC.cid === null)
             rC.cid = "cid-undefined-" + Math.random().toString(16).slice(2) + "-" + (new Date()).getTime()
+
+        C.cid = rC.cid;
 
         for (var p in oC) {
             var pv = C[p];
@@ -430,6 +562,8 @@ class Card extends Component {
             if (!rC.hasOwnProperty(p))
                 rC[p] = pv;
         }
+
+        log("set (or not), C 2", checkID, CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, rC ? JSON.parse(JSON.stringify(rC)) : rC);
 
         const dragable = this.props.dragable || "false";
         const dropable = this.props.dropable || "false";
