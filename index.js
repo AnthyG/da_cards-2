@@ -75,21 +75,60 @@ app.get('/cards', function(req, res) {
     log('Serving all cards');
     res.json(CardArr);
 });
-app.get('/card/:type', function(req, res) {
+
+function cardTypeRes(req, res) {
     const type = req.params.type;
-    log('Serving card ', type);
-    res.json(CardArr[type]);
-});
+    const exists = CardArr.hasOwnProperty(type);
+    log('Serving card ', type, exists);
+    if (exists)
+        res.json(CardArr[type]);
+    else
+        res.status(404).json({
+            "type": "",
+            "animations": {
+                "face": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                },
+                "bg": {
+                    "x_px": 0,
+                    "y_px": 0,
+                    "frameNr": 0
+                }
+            },
+            "description": "",
+            "cid": null,
+            "alreadyUsed": false,
+            "roundsLeft": 0,
+            "marked": false,
+            "MPS": 0,
+            "HP": 0,
+            "AP": 0,
+            "AT": "",
+            "effects": {}
+        });
+}
+app.get('/card/:type', cardTypeRes);
 
 app.get('/cardeffects', function(req, res) {
     log('Serving all cardeffects');
     res.json(CardEffectsArr);
 });
-app.get('/cardeffect/:type', function(req, res) {
+
+function cardEffectRes(req, res) {
     const type = req.params.type;
-    log('Serving cardeffect ', type);
-    res.json(CardEffectsArr[type]);
-});
+    const exists = CardEffectsArr.hasOwnProperty(type);
+    log('Serving cardeffect ', type, exists);
+    if (exists)
+        res.json(CardEffectsArr[type]);
+    else
+        res.status(400).json({
+            "description": "",
+            "roundsLeft": 0
+        });
+}
+app.get('/cardeffect/:type', cardEffectRes);
 
 var dir = __dirname + '/build/';
 app.use(express.static(dir));

@@ -4,52 +4,48 @@ import PropTypes from 'prop-types';
 import { DragSource, DropTarget } from 'react-dnd';
 import flow from 'lodash/flow';
 
-import request from 'sync-request';
+import request from 'then-request';
 import { s_address } from './addresses.js';
 
 import { log, err } from './logerr.js';
 
 var CardArr = {};
-function getCardArr() {
-    try {
-        const resCardArr = request('GET', s_address + '/cards');
-        CardArr = JSON.parse(resCardArr.body);
-    } catch (error) {
-        err(error);
-    }
+function getCardArr(cb) {
+    request('GET', s_address + '/cards').done((res)=>{
+        CardArr = JSON.parse(res.body);
+
+        typeof cb === "function" && cb(CardArr, res);
+    });
 }
-getCardArr();
-function getCard(type) {
-    try {
-        const resCard = request('GET', s_address + '/card/' + type);
-        var nCard;
-        eval('nCard = ' + resCard.body);
-        CardArr[type] = nCard;
-    } catch (error) {
-        err(error);
-    }
+// getCardArr();
+function getCard(type, cb) {
+    request('GET', s_address + '/card/' + type).done((res)=>{
+        // log("getCard", type, res);
+
+        CardArr[type] = JSON.parse(res.body);
+
+        typeof cb === "function" && cb(CardArr[type], res);
+    });
 }
 // getCard('King');
 
 var CardEffectsArr = {};
-function getCardEffectsArr() {
-    try {
-        const resCardEffectsArr = request('GET', s_address + '/cardeffects');
-        CardEffectsArr = JSON.parse(resCardEffectsArr.body);
-    } catch (error) {
-        err(error);
-    }
+function getCardEffectsArr(cb) {
+    request('GET', s_address + '/cardeffects').done((res)=>{
+        CardEffectsArr = JSON.parse(res.body);
+
+        typeof cb === "function" && cb(CardEffectsArr, res);
+    });
 }
-getCardEffectsArr();
-function getCardEffect(type) {
-    try {
-        const resCardEffect = request('GET', s_address + '/cardeffect/' + type);
-        var nCardEffect;
-        eval('nCardEffect = ' + resCardEffect.body);
-        CardEffectsArr[type] = nCardEffect;
-    } catch (error) {
-        err(error);
-    }
+// getCardEffectsArr();
+function getCardEffect(type, cb) {
+    request('GET', s_address + '/cardeffect/' + type).done((res)=>{
+        // log("getCardEffect", type, res);
+
+        CardEffectsArr[type] = JSON.parse(res.body);
+
+        typeof cb === "function" && cb(CardEffectsArr[type], res);
+    });
 }
 // getCardEffect('Motivate 1');
 
@@ -122,6 +118,7 @@ class CardFace extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            cardInfoLoaded: this.props.cardinfoloaded ? true : false,
             frame_face: 0,
             frame_bg: 0
         };
@@ -129,30 +126,33 @@ class CardFace extends Component {
 
     draw() {
         const C = this.props.c;
+        const rC = this.props.rc;
         const curFrame_face = this.state.frame_face;
         const curFrame_bg = this.state.frame_bg;
+        const animations = (C.animations || rC.animations);
+
+        log("draw", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
         
-        const x_px_face = C.animations.face.x_px;
+        const x_px_face = animations.face.x_px;
 
         const cx_face = curFrame_face % x_px_face;
 
         const cy_face = (curFrame_face - curFrame_face % x_px_face) / x_px_face;
         
                 
-        const x_px_bg = C.animations.bg.x_px;
+        const x_px_bg = animations.bg.x_px;
 
         const cx_bg = curFrame_bg % x_px_bg;
 
         const cy_bg = (curFrame_bg - curFrame_bg % x_px_bg) / x_px_bg;
 
 
-        const dis = this;
 
-        const cvs = dis.cvs;
-        const ctx = dis.ctx;
+        const cvs = this.cvs;
+        const ctx = this.ctx;
 
-        const img_face = dis.img_face;
-        const img_bg = dis.img_bg;
+        const img_face = this.img_face;
+        const img_bg = this.img_bg;
 
         this.ctx.clearRect(0, 0, cvs.width, cvs.height);
         
@@ -165,7 +165,7 @@ class CardFace extends Component {
         }
     }
 
-    componentDidMount() {
+    newDraw() {
         const C = this.props.c;
         const rC = this.props.rc;
         const type = C.type;
@@ -176,6 +176,8 @@ class CardFace extends Component {
         this.cvs.height = 85;
 
         this.ctx = this.cvs.getContext('2d');
+
+        log('Card-' + rC.cid, type, this.cvs, this.ctx);
 
         this.img_face = new Image();
         this.img_bg = new Image();
@@ -192,23 +194,48 @@ class CardFace extends Component {
         };
 
         this.img_face.src = '/Cards/Card-PNGs/' + type + '_Icon.png';
+    }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        const test = this.props.cardinfoloaded !== nextProps.cardinfoloaded;
+        // log("shouldComponentUpdate", this.props, this.state, nextProps, nextState, test);
+        if (test) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    componentDidMount() {
+        this.newDraw();
+    }
+    componentDidUpdate(prevProps, prevState) {
+        clearInterval(this.timerID);
+        log("componentDidUpdate", prevProps, prevState, this.props, this.state);
+        this.newDraw();
     }
 
     componentWillUnmount() {
         clearInterval(this.timerID);
     }
+    // componentWillUpdate() {
+    //     clearInterval(this.timerID);
+    // }
 
     tick() {
         const C = this.props.c;
+        const rC = this.props.rc;
         const curFrame_face = this.state.frame_face;
         const curFrame_bg = this.state.frame_bg;
+        const animations = (C.animations || rC.animations);
+
+        log("tick", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
 
         this.draw();
 
         this.setState({
-            frame_face: (curFrame_face + 1 < C.animations.face.frameNr ? curFrame_face + 1 : 0),
-            frame_bg: (curFrame_bg + 1 < C.animations.bg.frameNr ? curFrame_bg + 1 : 0)
+            frame_face: (curFrame_face + 1 < animations.face.frameNr ? curFrame_face + 1 : 0),
+            frame_bg: (curFrame_bg + 1 < animations.bg.frameNr ? curFrame_bg + 1 : 0)
         });
     }
 
@@ -216,7 +243,7 @@ class CardFace extends Component {
         const rC = this.props.rc;
 
         return (
-            <div className="CardFace">
+            <div className="CardFace" cardinfoloaded={this.state.cardInfoLoaded.toString()}>
                 <canvas id={"Card-" + rC.cid}></canvas>
             </div>
         );
@@ -238,11 +265,38 @@ class CardCorner extends Component {
 }
 
 class CardEffect extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            effectInfoLoaded: CardEffectsArr.hasOwnProperty(this.props.type) || false
+        };
+    }
+
+    componentDidMount() {
+        var dis = this;
+
+        if (!CardEffectsArr.hasOwnProperty(this.props.type)
+            && this.props.type !== null && this.props.type) {
+            getCardEffect(this.props.type, function(rbody, res) {
+                // log(rbody, res);
+
+                dis.setState({
+                    effectInfoLoaded: true
+                });
+            });   
+        }
+    }
+
     render() {
         const type = this.props.type;
         const rl = this.props.rl;
 
-        const effect = CardEffectsArr[type];
+        var effect = {
+            "description": "",
+            "roundsLeft": 0
+        };
+        if (CardEffectsArr.hasOwnProperty(type))
+            effect = CardEffectsArr[type];
 
         return (
             <div className="CardEffect">
@@ -297,9 +351,27 @@ class Card extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            cardInfoLoaded: CardArr.hasOwnProperty(this.props.type) || false,
             fOb: this.props.fOb || "front",
             hoverable: this.props.hoverable || "false"
         };
+    }
+    
+    componentDidMount() {
+        var dis = this;
+
+        // log("check: ", this.props.type, !CardArr.hasOwnProperty(this.props.type), this.props.type !== null, !!this.props.type);
+
+        if (!CardArr.hasOwnProperty(this.props.type)
+            && this.props.type !== null && !!this.props.type) {
+            getCard(this.props.type, function(rbody, res) {
+                // log(rbody, res);
+
+                dis.setState({
+                    cardInfoLoaded: true
+                });
+            });
+        }
     }
 
     render() {
@@ -309,7 +381,7 @@ class Card extends Component {
         const { connectDragSource, connectDropTarget, connectDragPreview, isDragging } = this.props;
         // log("DnD >>", connectDragSource, connectDropTarget, isDragging);
 
-        var C = {
+        var oC = {
             "type": "",
             "animations": {
                 "face": {
@@ -334,17 +406,30 @@ class Card extends Component {
             "AT": "",
             "effects": {}
         };
+        var C = {};
         const type = this.props.type;
         if (CardArr.hasOwnProperty(type))
             C = CardArr[type];
+        else
+            C = JSON.parse(JSON.stringify(oC));
+
+        log("set (or not), C", CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, this.props.rc ? JSON.parse(JSON.stringify(this.props.rc)) : this.props.rc);
 
         const rC = this.props.rc || JSON.parse(JSON.stringify(C));
         const position = this.props.position;
         const dt = this.props.dt;
         const ooe = this.props.ooe;
 
-        if (!rC.cid)
+        if (rC.cid === null)
             rC.cid = "cid-undefined-" + Math.random().toString(16).slice(2) + "-" + (new Date()).getTime()
+
+        for (var p in oC) {
+            var pv = C[p];
+            if (!C.hasOwnProperty(p))
+                C[p] = pv;
+            if (!rC.hasOwnProperty(p))
+                rC[p] = pv;
+        }
 
         const dragable = this.props.dragable || "false";
         const dropable = this.props.dropable || "false";
@@ -360,6 +445,7 @@ class Card extends Component {
 
         const CardMark =
             <div className="Card" type={type} fob={fOb}
+                cardinfoloaded={this.state.cardInfoLoaded.toString()}
                 dt={dt} position={position} ooe={ooe}
                 alreadyused={alreadyUsed} marked={marked}
                 hoverable={hoverable}
@@ -367,7 +453,7 @@ class Card extends Component {
                 dropable={alreadyUsed === 'false' ? dropable : 'false'}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
-                    <CardFace c={C} rc={rC} />
+                    <CardFace c={C} rc={rC} cardinfoloaded={this.state.cardInfoLoaded.toString()}/>
                     <span className="CardName">{type}</span>
                     <CardInfo c={C} rc={rC} />
                     <CardCorner ctype="AP" value={AP} />

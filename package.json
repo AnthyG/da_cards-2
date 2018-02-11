@@ -11,7 +11,8 @@
         "react-dom": "^16.2.0",
         "react-scripts": "1.0.14",
         "socket.io": "^2.0.4",
-        "sync-request": "^4.1.0"
+        "sync-request": "^4.1.0",
+        "then-request": "^5.0.0"
     },
     "scripts": {
         "serve": "node index.js",
