@@ -15,6 +15,9 @@ env:
 install:
 - npm install
 before_script:
+- ls -alh
+- cp -r PRIVATE_open PRIVATE
+- ls -alh
 - npm run serve
 - sleep 5
 - export DISPLAY=:99.0
