@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import ErrorBoundary from './ErrorBoundary.jsx';
+
 import PropTypes from 'prop-types';
 import { DragSource, DropTarget } from 'react-dnd';
 import flow from 'lodash/flow';
@@ -38,7 +40,7 @@ function getCardArr(cb) {
     request('GET', s_address + '/cards').done((res) => {
         try {
             CardArr = JSON.parse(res.body);
-        } catch(error) {
+        } catch (error) {
             err(error);
         }
 
@@ -56,9 +58,9 @@ function getCard(type, cb) {
             if (tryRequests.cards.indexOf(type) !== -1) {
                 tryRequests.cards.splice(tryRequests.cards.indexOf(type), 1);
             }
-        } catch(error) {
+        } catch (error) {
             err(error);
-            
+
             if (tryRequests.cards.indexOf(type) === -1) {
                 tryRequests.cards.push(type);
             }
@@ -74,7 +76,7 @@ function getCardEffectsArr(cb) {
     request('GET', s_address + '/cardeffects').done((res) => {
         try {
             CardEffectsArr = JSON.parse(res.body);
-        } catch(error) {
+        } catch (error) {
             err(error);
         }
 
@@ -92,9 +94,9 @@ function getCardEffect(type, cb) {
             if (tryRequests.effects.indexOf(type) !== -1) {
                 tryRequests.effects.splice(tryRequests.effects.indexOf(type), 1);
             }
-        } catch(error) {
+        } catch (error) {
             err(error);
-            
+
             if (tryRequests.effects.indexOf(type) === -1) {
                 tryRequests.effects.push(type);
             }
@@ -116,8 +118,9 @@ const cardSource = {
     },
     endDrag(props, monitor, component) {
         log('endDrag >>..', monitor.didDrop(), props, monitor, component);
-        if (!monitor.didDrop())
+        if (!monitor.didDrop()) {
             return;
+        }
 
         const C1 = monitor.getItem(); // === props
         const C2 = monitor.getDropResult(); // this comes from target's .drop
@@ -187,15 +190,15 @@ class CardFace extends Component {
         const curFrame_bg = this.state.frame_bg;
         const animations = (C.animations || rC.animations);
 
-        log("draw", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
-        
+        // log("draw", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
+
         const x_px_face = animations.face.x_px;
 
         const cx_face = curFrame_face % x_px_face;
 
         const cy_face = (curFrame_face - curFrame_face % x_px_face) / x_px_face;
-        
-                
+
+
         const x_px_bg = animations.bg.x_px;
 
         const cx_bg = curFrame_bg % x_px_bg;
@@ -211,11 +214,11 @@ class CardFace extends Component {
         const img_bg = this.img_bg;
 
         this.ctx.clearRect(0, 0, cvs.width, cvs.height);
-        
+
         if (img_bg.src) {
             ctx.drawImage(img_bg, cx_bg * 55, cy_bg * 85, 55, 85, 0, 0, 55, 85);
         }
-        
+
         if (img_face.src) {
             ctx.drawImage(img_face, cx_face * 55, cy_face * 85, 55, 85, 0, 0, 55, 85);
         }
@@ -226,6 +229,8 @@ class CardFace extends Component {
         const rC = this.props.rc;
         const type = C.type;
 
+        const animations = (C.animations || rC.animations);
+
         this.cvs = document.getElementById('Card-' + rC.cid);
 
         this.cvs.width = 55;
@@ -233,14 +238,14 @@ class CardFace extends Component {
 
         this.ctx = this.cvs.getContext('2d');
 
-        log('Card-' + rC.cid, type, this.cvs, this.ctx);
+        log('newDraw: Card-' + rC.cid, type, this.cvs, this.ctx, C, rC, animations);
 
         this.img_face = new Image();
         this.img_bg = new Image();
 
         const dis = this;
-        this.img_face.onload = function() {
-            dis.img_bg.onload = function() {
+        this.img_face.onload = function () {
+            dis.img_bg.onload = function () {
                 dis.timerID = setInterval(
                     () => dis.tick(),
                     120
@@ -285,7 +290,7 @@ class CardFace extends Component {
         const curFrame_bg = this.state.frame_bg;
         const animations = (C.animations || rC.animations);
 
-        log("tick", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
+        // log("tick", C, C.type, rC, rC.type, animations, curFrame_face, curFrame_bg);
 
         this.draw();
 
@@ -333,24 +338,21 @@ class CardEffect extends Component {
 
         if (!CardEffectsArr.hasOwnProperty(this.props.type)
             && this.props.type !== null && this.props.type) {
-            getCardEffect(this.props.type, function(rbody, res) {
-                // log(rbody, res);
-            
-                function getCardEffectIntervalFunc() {
-                    getCardEffect(dis.props.type, function(rbody, res) {
-                        if (rbody) {
-                            clearInterval(getCardEffectInterval);
-    
-                            dis.setState({
-                                effectInfoLoaded: true
-                            });
-                        }
-                    });
-                }
-                getCardEffectIntervalFunc();
+            function getCardEffectIntervalFunc() {
+                getCardEffect(dis.props.type, function (rbody, res) {
+                    if (rbody) {
+                        clearInterval(getCardEffectInterval);
 
-                var getCardEffectInterval = setInterval(getCardEffectIntervalFunc, 10000);
-            });   
+                        dis.setState({
+                            effectInfoLoaded: true
+                        });
+                        dis.render();
+                    }
+                });
+            }
+            getCardEffectIntervalFunc();
+
+            var getCardEffectInterval = setInterval(getCardEffectIntervalFunc, 10000);
         }
     }
 
@@ -362,8 +364,9 @@ class CardEffect extends Component {
             "description": "",
             "roundsLeft": 0
         };
-        if (CardEffectsArr.hasOwnProperty(type))
+        if (CardEffectsArr.hasOwnProperty(type)) {
             effect = CardEffectsArr[type];
+        }
 
         return (
             <div className="CardEffect">
@@ -418,12 +421,13 @@ class Card extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            rC: this.props.rc,
             cardInfoLoaded: CardArr.hasOwnProperty(this.props.type) || false,
             fOb: this.props.fOb || "front",
             hoverable: this.props.hoverable || "false"
         };
     }
-    
+
     componentDidMount() {
         var dis = this;
 
@@ -461,18 +465,21 @@ class Card extends Component {
 
         const type = this.props.type;
 
-        if (CardArr.hasOwnProperty(type))
+        if (CardArr.hasOwnProperty(type)) {
             C = CardArr[type];
+        }
 
-        var rC = this.props.rc || {};
+        var rC = this.state.rC || JSON.parse(JSON.stringify(oC));
 
         var error = false;
         for (var p in oC) {
-            var pv = C[p];
-            if (!C.hasOwnProperty(p))
+            var pv = oC[p];
+            if (!C.hasOwnProperty(p)) {
                 error = true;
-            if (!rC.hasOwnProperty(p))
+            }
+            if (!rC.hasOwnProperty(p)) {
                 error = true;
+            }
         }
 
         log("check 2: ", checkID, this.props.type, !CardArr.hasOwnProperty(this.props.type), this.props.type !== null, !!this.props.type, error);
@@ -481,17 +488,26 @@ class Card extends Component {
             this.props.type !== null && !!this.props.type
         ) {
             log("gettingCard: ", checkID);
-            
+
             function getCardIntervalFunc() {
-                getCard(dis.props.type, function(rbody, res) {
+                getCard(dis.props.type, function (rbody, res) {
                     log("getCard: ", checkID, rbody, res);
 
                     if (rbody) {
                         clearInterval(getCardInterval);
 
+                        for (var p in CardArr[type]) {
+                            var pv = CardArr[type][p];
+                            if (!rC.hasOwnProperty(p)) {
+                                rC[p] = pv;
+                            }
+                        }
+
                         dis.setState({
-                            cardInfoLoaded: true
+                            cardInfoLoaded: true,
+                            rC: rC
                         });
+                        dis.render();
                     }
                 });
             }
@@ -534,38 +550,30 @@ class Card extends Component {
             "effects": {}
         };
 
-        var C = {};
+        var C = JSON.parse(JSON.stringify(oC));
 
         const type = this.props.type;
-        
-        const checkID = (Math.floor((Math.random() * 90000) + 10000)).toString();
 
-        if (CardArr.hasOwnProperty(type))
+        if (CardArr.hasOwnProperty(type)) {
             C = CardArr[type];
-        else
-            C = JSON.parse(JSON.stringify(oC));
+        }
 
-        log("set (or not), C", checkID, JSON.parse(JSON.stringify(this.state.stateC)), CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, this.props.rc ? JSON.parse(JSON.stringify(this.props.rc)) : this.props.rc);
+        var rC = this.state.rC || JSON.parse(JSON.stringify(oC));
 
-        var rC = this.props.rc || JSON.parse(JSON.stringify(C));
+        for (var p in oC) {
+            var pv = oC[p];
+            if (!rC.hasOwnProperty(p)) {
+                rC[p] = pv;
+            }
+        }
+
         const position = this.props.position;
         const dt = this.props.dt;
         const ooe = this.props.ooe;
 
-        if (rC.cid === null)
+        if (rC.cid === null) {
             rC.cid = "cid-undefined-" + Math.random().toString(16).slice(2) + "-" + (new Date()).getTime()
-
-        C.cid = rC.cid;
-
-        for (var p in oC) {
-            var pv = C[p];
-            if (!C.hasOwnProperty(p))
-                C[p] = pv;
-            if (!rC.hasOwnProperty(p))
-                rC[p] = pv;
         }
-
-        log("set (or not), C 2", checkID, CardArr.hasOwnProperty(type), C ? JSON.parse(JSON.stringify(C)) : C, rC ? JSON.parse(JSON.stringify(rC)) : rC);
 
         const dragable = this.props.dragable || "false";
         const dropable = this.props.dropable || "false";
@@ -589,7 +597,9 @@ class Card extends Component {
                 dropable={alreadyUsed === 'false' ? dropable : 'false'}
                 isdragging={isDragging ? "true" : "false"}>
                 <div className="CardFG" tabIndex="-1">
-                    <CardFace c={C} rc={rC} cardinfoloaded={this.state.cardInfoLoaded.toString()}/>
+                    <ErrorBoundary>
+                        <CardFace c={C} rc={rC} cardinfoloaded={this.state.cardInfoLoaded.toString()} />
+                    </ErrorBoundary>
                     <span className="CardName">{type}</span>
                     <CardInfo c={C} rc={rC} />
                     <CardCorner ctype="AP" value={AP} />
@@ -600,26 +610,27 @@ class Card extends Component {
                 <div className="CardBG" tabIndex="-1"></div>
             </div>
 
-        if (dragable === "true" && dropable === "true")
+        if (dragable === "true" && dropable === "true") {
             return connectDragSource(connectDropTarget(connectDragPreview(
                 CardMark, {
                     captureDraggingState: true
                 }
             )));
-        else if (dragable === "true" && dropable === "false")
+        } else if (dragable === "true" && dropable === "false") {
             return connectDragSource(connectDragPreview(
                 CardMark, {
                     captureDraggingState: true
                 }
             ));
-        else if (dragable === "false" && dropable === "true")
+        } else if (dragable === "false" && dropable === "true") {
             return connectDropTarget(
                 CardMark
             );
-        else
+        } else {
             return (
                 CardMark
             );
+        }
     }
 }
 
@@ -628,7 +639,7 @@ Card.propTypes = {
     connectDropTarget: PropTypes.func.isRequired,
     connectDragPreview: PropTypes.func.isRequired,
     isDragging: PropTypes.bool.isRequired
-}
+};
 
 export default flow(
     DragSource(Types.CARD, cardSource, collectSource),

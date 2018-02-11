@@ -98,7 +98,6 @@
         bottom: 0;
         width: 100%;
         height: 100%;
-        overflow: hidden;
         position: absolute;
         backface-visibility: hidden;
         background-repeat: no-repeat;
@@ -119,6 +118,9 @@
             height: 100%;
             position: absolute;
         }
+    }
+    & .CardFace {
+        overflow: hidden;
     }
     & .CardName {
         left: 50%;

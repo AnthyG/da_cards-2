@@ -9,6 +9,7 @@ import { log, err } from './logerr.js';
 
 import { socket } from './socket.js';
 
+import ErrorBoundary from './ErrorBoundary.jsx';
 import Card from './Card.jsx';
 import Game from './Game.jsx';
 
@@ -44,8 +45,9 @@ class FormLogin extends Component {
         const username = this.props.username;
         const password = this.state.password;
 
-        if (username && password)
+        if (username && password) {
             this.props.handleLogin(password);
+        }
     }
 
     render() {
@@ -252,7 +254,7 @@ class App extends Component {
             'results': 'lobby'
         };
         const nstate = state2nstateArr[state];
-        
+
         nstate === 'searching' && window.history.replaceState({}, 'Searching..', '/');
         nstate === 'lobby' && window.history.replaceState({}, 'Lobby', '/');
 
@@ -265,12 +267,12 @@ class App extends Component {
         const state = this.state.state;
 
         let CurScreen = null;
-        if (isLoggedIn)
+        if (isLoggedIn) {
             // if (state === 'inGame')
             //     CurScreen = <GameScreen />
             // else
             CurScreen = <MainScreen username={username} state={state} handleLogout={this.handleLogout} handleStateChange={this.handleStateChange} />;
-        else
+        } else {
             CurScreen = (
                 <div>
                     <LoginScreen username={username} handleUsernameChange={this.handleUsernameChange} handleLogin={this.handleLogin} />
@@ -284,6 +286,7 @@ class App extends Component {
                     </div>
                 </div>
             );
+        }
 
         return (
             <div className="App">

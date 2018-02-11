@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+
+import ErrorBoundary from './ErrorBoundary.jsx';
 import Card from './Card.jsx';
 
 import { log, err } from './logerr.js';
@@ -25,7 +27,7 @@ class RenderCardArr extends Component {
             // );
             for (let x in arr) {
                 let y = arr[x];
-                if (y !== null)
+                if (y !== null) {
                     rArr.push(
                         <Card fOb="front"
                             ooe={ooe} dt={dt} position={x}
@@ -35,7 +37,7 @@ class RenderCardArr extends Component {
                             key={ooe + '-' + dt + '-' + y.cid}
                             movecard={this.props.movecard} />
                     );
-                else
+                } else {
                     rArr.push(
                         <Card fOb="front"
                             ooe={ooe} dt={dt} position={x}
@@ -45,6 +47,7 @@ class RenderCardArr extends Component {
                             key={ooe + '-' + dt + '-' + x}
                             movecard={this.props.movecard} />
                     );
+                }
             }
         } else {
             for (let x = 0; x < arr; x++) {
@@ -56,7 +59,7 @@ class RenderCardArr extends Component {
                         dragable="false" dropable="false"
                         key={ooe + '-' + dt + '-' + x}
                         movecard={this.props.movecard} />
-                )
+                );
             }
         }
         // log('rArr >>', ooe, dt, rArr);
@@ -240,12 +243,13 @@ class Game extends Component {
 
         const g = this.state.g;
         log('g2 >>', g);
-        if (!g.hasOwnProperty('gid'))
+        if (!g.hasOwnProperty('gid')) {
             return (
                 <div>
                     <h2>Invalid GID!</h2>
                 </div>
-            )
+            );
+        }
 
         const iAmNr = g.Players[0].User.name === username ? 0 : (g.Players[1].User.name === username ? 1 : 0);
         return (
