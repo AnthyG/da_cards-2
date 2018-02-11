@@ -55,11 +55,11 @@ class FormLogin extends Component {
             <form onSubmit={this.handleSubmit}>
                 <label>
                     Username:
-                    <input name="username" type="text" value={username} onChange={this.handleUsernameChange} />
+                    <input name="username" type="text" autoComplete="username" value={username} onChange={this.handleUsernameChange} />
                 </label>
                 <label>
                     Password:
-                    <input name="password" type="password" value={this.state.password} onChange={this.handleInputChange} />
+                    <input name="password" type="password" autoComplete="current-password" value={this.state.password} onChange={this.handleInputChange} />
                 </label>
                 <input type="submit" value="Log in" />
             </form>

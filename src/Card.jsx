@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { DragSource, DropTarget } from 'react-dnd';
 import flow from 'lodash/flow';
 
+import 'raf/polyfill';
+
 import request from 'then-request';
 import { s_address } from './addresses.js';
 
