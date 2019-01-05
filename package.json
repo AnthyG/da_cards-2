@@ -1,6 +1,6 @@
 {
     "name": "da_cards-2",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "private": true,
     "dependencies": {
         "express": "^4.16.3",
@@ -9,11 +9,23 @@
         "react-dnd": "^2.6.0",
         "react-dnd-html5-backend": "^2.6.0",
         "react-dnd-touch-backend": "^0.3.21",
-        "react-dom": "^16.3.2",
+        "react-dom": "^16.3.3",
         "react-scripts": "1.0.14",
         "socket.io": "^2.1.0",
         "sync-request": "^4.1.0",
-        "then-request": "^5.0.0"
+        "then-request": "^5.0.0",
+        "cryptiles": "^4.1.2",
+        "macaddress": "^0.2.9",
+        "sshpk": "^1.13.2",
+        "url-parse": "^1.4.3",
+        "lodash": "^4.17.5",
+        "hoek": "^4.2.1",
+        "webpack-dev-server": "^3.1.11",
+        "react-dev-utils": "^4.2.2",
+        "merge": "^1.2.1",
+        "randomatic": "^3.0.0",
+        "deep-extend": "^0.5.1",
+        "mime": "^1.4.1"
     },
     "scripts": {
         "serve": "node index.js",
