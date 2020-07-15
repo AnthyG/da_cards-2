@@ -18,7 +18,7 @@
         "macaddress": "^0.2.9",
         "sshpk": "^1.13.2",
         "url-parse": "^1.4.3",
-        "lodash": "^4.17.13",
+        "lodash": "^4.17.19",
         "hoek": "^4.2.1",
         "webpack-dev-server": "^3.1.11",
         "react-dev-utils": "^4.2.2",
