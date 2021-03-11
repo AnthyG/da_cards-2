@@ -21,7 +21,7 @@
         "lodash": "^4.17.13",
         "hoek": "^4.2.1",
         "webpack-dev-server": "^3.1.11",
-        "react-dev-utils": "^4.2.2",
+        "react-dev-utils": "^11.0.4",
         "merge": "^1.2.1",
         "randomatic": "^3.0.0",
         "deep-extend": "^0.5.1",
