@@ -22,7 +22,7 @@
         "hoek": "^4.2.1",
         "webpack-dev-server": "^3.1.11",
         "react-dev-utils": "^4.2.2",
-        "merge": "^1.2.1",
+        "merge": "^2.1.1",
         "randomatic": "^3.0.0",
         "deep-extend": "^0.5.1",
         "mime": "^1.4.1"
