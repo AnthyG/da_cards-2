@@ -17,7 +17,7 @@
         "cryptiles": "^4.1.2",
         "macaddress": "^0.2.9",
         "sshpk": "^1.13.2",
-        "url-parse": "^1.4.3",
+        "url-parse": "^1.5.8",
         "lodash": "^4.17.13",
         "hoek": "^4.2.1",
         "webpack-dev-server": "^3.1.11",
